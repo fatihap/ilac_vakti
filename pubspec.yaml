@@ -1,0 +1,56 @@
+name: ilac_hatirlat
+description: "İlaç Vakti - İlaç takip ve hatırlatma uygulaması"
+publish_to: 'none' 
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  
+  # HTTP requests
+  http: ^1.1.0
+  
+  # State management
+  provider: ^6.1.1
+  
+  # Local storage
+  shared_preferences: ^2.2.2
+  
+  # Form validation
+  email_validator: ^2.1.17
+  
+  # UI components
+  flutter_spinkit: ^5.2.0
+  
+  # Icons
+  font_awesome_flutter: ^10.6.0
+  
+  # Notifications
+  onesignal_flutter: ^5.3.4
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.4
+
+flutter:
+
+  uses-material-design: true
+
+  assets:
+    - assets/
+
+# Flutter Launcher Icons konfigürasyonu
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/app_logo.png"
+  min_sdk_android: 21 # android min sdk min:16, default 21
