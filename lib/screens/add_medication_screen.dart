@@ -84,18 +84,20 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
 
     // Load reminder times from either reminderTimes list or single reminderTime
     _reminderTimes = [];
-    
+
     // Debug: Print all medication data
     print('🔍 Full medication data: ${medication.toJson()}');
     print('🔍 reminderTimes: ${medication.reminderTimes}');
     print('🔍 reminderTime: ${medication.reminderTime}');
     print('🔍 allReminderTimes: ${medication.allReminderTimes}');
     print('🔍 targetCount: ${medication.targetCount}');
-    
+
     if (medication.reminderTimes != null &&
         medication.reminderTimes!.isNotEmpty) {
       // Load from reminderTimes list
-      print('📅 Loading reminder times from reminderTimes: ${medication.reminderTimes}');
+      print(
+        '📅 Loading reminder times from reminderTimes: ${medication.reminderTimes}',
+      );
       for (final timeString in medication.reminderTimes!) {
         final timeParts = timeString.split(':');
         if (timeParts.length == 2) {
@@ -110,7 +112,9 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
     } else if (medication.allReminderTimes != null &&
         medication.allReminderTimes!.isNotEmpty) {
       // Load from allReminderTimes list (alternative field)
-      print('📅 Loading reminder times from allReminderTimes: ${medication.allReminderTimes}');
+      print(
+        '📅 Loading reminder times from allReminderTimes: ${medication.allReminderTimes}',
+      );
       for (final timeString in medication.allReminderTimes!) {
         final timeParts = timeString.split(':');
         if (timeParts.length == 2) {
@@ -124,7 +128,9 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
       }
     } else if (medication.reminderTime != null) {
       // Load from single reminderTime
-      print('📅 Loading reminder time from reminderTime: ${medication.reminderTime}');
+      print(
+        '📅 Loading reminder time from reminderTime: ${medication.reminderTime}',
+      );
       final timeParts = medication.reminderTime!.split(':');
       if (timeParts.length == 2) {
         _reminderTimes = [
@@ -138,7 +144,9 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
       print('⚠️ No reminder times found in medication data');
     }
 
-    print('📅 Loaded ${_reminderTimes.length} reminder times: ${_reminderTimes.map((t) => '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}').join(', ')}');
+    print(
+      '📅 Loaded ${_reminderTimes.length} reminder times: ${_reminderTimes.map((t) => '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}').join(', ')}',
+    );
 
     // Set daily notification count to match the loaded reminder times
     // This ensures the UI shows the correct number of selected times
@@ -187,10 +195,12 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
 
   Future<void> _selectStartDate() async {
     // Düzenleme modunda geçmiş tarihleri de seçebilmek için firstDate'i ayarla
-    final firstDate = widget.medication != null 
-        ? DateTime.now().subtract(const Duration(days: 365)) // Düzenleme modunda 1 yıl öncesine kadar
+    final firstDate = widget.medication != null
+        ? DateTime.now().subtract(
+            const Duration(days: 365),
+          ) // Düzenleme modunda 1 yıl öncesine kadar
         : DateTime.now(); // Yeni ilaç eklerken sadece bugün ve sonrası
-    
+
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: _startDate,
@@ -245,6 +255,30 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
         _reminderTimes.sort((a, b) => a.hour.compareTo(b.hour));
       }
     });
+  }
+
+  void _updateNotificationCountFromDose(String dose) {
+    if (dose.isEmpty) return;
+
+    // Doz metninden sayı çıkarmaya çalış
+    final RegExp numberRegex = RegExp(r'(\d+)');
+    final match = numberRegex.firstMatch(dose.toLowerCase());
+
+    if (match != null) {
+      final number = int.tryParse(match.group(1)!);
+      if (number != null && number > 0 && number <= 10) {
+        // Eğer dozda bir sayı varsa ve makul bir aralıktaysa, bildirim sayısını güncelle
+        setState(() {
+          _dailyNotificationCount = number;
+          // Mevcut saatleri yeni sayıya göre ayarla
+          if (_reminderTimes.length > _dailyNotificationCount) {
+            _reminderTimes = _reminderTimes
+                .take(_dailyNotificationCount)
+                .toList();
+          }
+        });
+      }
+    }
   }
 
   Future<void> _saveMedication() async {
@@ -534,8 +568,10 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                       _buildTextField(
                         controller: _dosageController,
                         label: 'Doz',
-                        hint: '500mg, 1 tablet, 5ml',
+                        hint: '1 tablet, 2 tablet, 5ml, 500mg',
                         icon: FontAwesomeIcons.prescription,
+                        onChanged: (value) =>
+                            _updateNotificationCountFromDose(value),
                       ),
 
                       const SizedBox(height: 20),
@@ -574,7 +610,6 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                       ),
 
                       const SizedBox(height: 20),
-
 
                       // Kaydet Butonu
                       Container(
@@ -654,6 +689,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
     required IconData icon,
     int maxLines = 1,
     String? Function(String?)? validator,
+    void Function(String)? onChanged,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -671,6 +707,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
         controller: controller,
         maxLines: maxLines,
         style: const TextStyle(fontSize: 16),
+        onChanged: onChanged,
         decoration: InputDecoration(
           labelText: label,
           hintText: hint,
@@ -958,7 +995,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
           ),
           const SizedBox(height: 16),
           Text(
-            'Günde kaç kez bildirim almak istiyorsunuz?',
+            'Günde kaç kez bildirim almak istiyorsunuz?\n(Doz alanına sayı girdiğinizde otomatik ayarlanır)',
             style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
           ),
           const SizedBox(height: 16),
@@ -967,7 +1004,15 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
             children: [
               IconButton(
                 onPressed: _dailyNotificationCount > 1
-                    ? () => setState(() => _dailyNotificationCount--)
+                    ? () => setState(() {
+                        _dailyNotificationCount--;
+                        // Seçilen saatleri yeni sayıya göre ayarla
+                        if (_reminderTimes.length > _dailyNotificationCount) {
+                          _reminderTimes = _reminderTimes
+                              .take(_dailyNotificationCount)
+                              .toList();
+                        }
+                      })
                     : null,
                 icon: const Icon(FontAwesomeIcons.minus),
                 style: IconButton.styleFrom(
@@ -997,7 +1042,10 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
               const SizedBox(width: 32),
               IconButton(
                 onPressed: _dailyNotificationCount < 10
-                    ? () => setState(() => _dailyNotificationCount++)
+                    ? () => setState(() {
+                        _dailyNotificationCount++;
+                        // Bildirim sayısı artırıldığında herhangi bir saat sıfırlamaya gerek yok
+                      })
                     : null,
                 icon: const Icon(FontAwesomeIcons.plus),
                 style: IconButton.styleFrom(

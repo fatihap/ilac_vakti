@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/app_constants.dart';
 import '../providers/auth_provider.dart';
 import '../models/medication_model.dart';
 import '../services/medication_service.dart';
 import '../services/message_service.dart';
+import '../services/onesignal_service.dart';
 import 'login_screen.dart';
 import 'add_medication_screen.dart';
 import 'medication_tracking_screen.dart';
+import 'onboarding_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -510,6 +513,22 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                         (route) => false,
                                       );
                                     }
+                                  } else if (value == 'onboarding') {
+                                    // Onboarding'i sıfırla ve göster
+                                    final prefs =
+                                        await SharedPreferences.getInstance();
+                                    await prefs.remove('onboarding_completed');
+
+                                    if (context.mounted) {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const OnboardingScreen(),
+                                        ),
+                                      );
+                                    }
+                                  } else if (value == 'delete_account') {
+                                    _showDeleteAccountDialog(authProvider);
                                   }
                                 },
                                 itemBuilder: (BuildContext context) => [
@@ -524,6 +543,25 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                         const SizedBox(width: 12),
                                         Text(
                                           '${authProvider.user?.name ?? ''} ${authProvider.user?.surname ?? ''}',
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const PopupMenuDivider(),
+
+                                  const PopupMenuItem<String>(
+                                    value: 'delete_account',
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          FontAwesomeIcons.userXmark,
+                                          size: 16,
+                                          color: Colors.red,
+                                        ),
+                                        SizedBox(width: 12),
+                                        Text(
+                                          'Hesap Sil',
+                                          style: TextStyle(color: Colors.red),
                                         ),
                                       ],
                                     ),
@@ -1339,5 +1377,392 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   String _getSuccessMessage() {
     return MessageService.getSuccessMessage();
+  }
+
+  Future<void> _showDeleteAccountDialog(AuthProvider authProvider) async {
+    final passwordController = TextEditingController();
+    bool isLoading = false;
+    bool obscurePassword = true;
+
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          backgroundColor: Colors.white,
+          title: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.red.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    FontAwesomeIcons.triangleExclamation,
+                    color: Colors.red,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Text(
+                    'Hesap Silme',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.05),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.red.withOpacity(0.2)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Row(
+                      children: [
+                        Icon(
+                          FontAwesomeIcons.exclamationTriangle,
+                          color: Colors.red,
+                          size: 16,
+                        ),
+                        SizedBox(width: 8),
+                        Text(
+                          'DİKKAT!',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Bu işlem geri alınamaz. Hesabınız ve tüm verileriniz kalıcı olarak silinecektir:',
+                      style: TextStyle(fontSize: 14, color: Color(0xFF374151)),
+                    ),
+                    const SizedBox(height: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildDeleteWarningItem('• Tüm ilaç kayıtlarınız'),
+                        _buildDeleteWarningItem('• Hatırlatma geçmişiniz'),
+                        _buildDeleteWarningItem('• Kişisel bilgileriniz'),
+                        _buildDeleteWarningItem('• Hesap ayarlarınız'),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Devam etmek için şifrenizi girin:',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF374151),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: passwordController,
+                obscureText: obscurePassword,
+                style: const TextStyle(fontSize: 16),
+                decoration: InputDecoration(
+                  labelText: 'Şifre',
+                  hintText: 'Mevcut şifrenizi girin',
+                  prefixIcon: const Icon(
+                    FontAwesomeIcons.lock,
+                    color: Colors.red,
+                    size: 18,
+                  ),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      obscurePassword
+                          ? FontAwesomeIcons.eyeSlash
+                          : FontAwesomeIcons.eye,
+                      size: 16,
+                      color: Colors.grey,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        obscurePassword = !obscurePassword;
+                      });
+                    },
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.grey.shade300),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(color: Colors.red, width: 2),
+                  ),
+                  filled: true,
+                  fillColor: Colors.grey.shade50,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 16,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: isLoading
+                  ? null
+                  : () => Navigator.of(context).pop(false),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.grey.shade600,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
+              ),
+              child: const Text('İptal'),
+            ),
+            ElevatedButton(
+              onPressed: isLoading
+                  ? null
+                  : () async {
+                      if (passwordController.text.trim().isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Şifre gerekli'),
+                            backgroundColor: Colors.red,
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                        return;
+                      }
+
+                      setState(() {
+                        isLoading = true;
+                      });
+
+                      try {
+                        final result = await authProvider.deleteAccount(
+                          passwordController.text.trim(),
+                        );
+
+                        if (result['success']) {
+                          Navigator.of(context).pop(true);
+                        } else {
+                          setState(() {
+                            isLoading = false;
+                          });
+
+                          String errorMessage =
+                              result['message'] ?? 'Hesap silinemedi';
+
+                          // Password error handling
+                          if (errorMessage.toLowerCase().contains('password') &&
+                              (errorMessage.toLowerCase().contains(
+                                    'incorrect',
+                                  ) ||
+                                  errorMessage.toLowerCase().contains(
+                                    'wrong',
+                                  ) ||
+                                  errorMessage.toLowerCase().contains(
+                                    'yanlış',
+                                  ))) {
+                            errorMessage =
+                                'Şifre yanlış. Lütfen tekrar deneyin.';
+                          }
+
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(errorMessage),
+                              backgroundColor: Colors.red,
+                              behavior: SnackBarBehavior.floating,
+                              duration: const Duration(seconds: 4),
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        setState(() {
+                          isLoading = false;
+                        });
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Bir hata oluştu: $e'),
+                            backgroundColor: Colors.red,
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      }
+                    },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+                elevation: 0,
+              ),
+              child: isLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(FontAwesomeIcons.trash, size: 14),
+                        SizedBox(width: 8),
+                        Text(
+                          'Hesabı Sil',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (result == true) {
+      // Show success message and navigate to login
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Container(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: const Row(
+              children: [
+                Icon(FontAwesomeIcons.check, color: Colors.white, size: 16),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'Hesabınız başarıyla silindi',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      Text(
+                        'Tüm verileriniz kalıcı olarak silindi',
+                        style: TextStyle(fontSize: 12, color: Colors.white70),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          margin: const EdgeInsets.all(16),
+          duration: const Duration(seconds: 3),
+        ),
+      );
+
+      // Navigate to login screen
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+          (route) => false,
+        );
+      }
+    }
+  }
+
+  Widget _buildDeleteWarningItem(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Text(
+        text,
+        style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+      ),
+    );
+  }
+
+  Future<void> _testOneSignalNotification() async {
+    try {
+      final oneSignalService = OneSignalService();
+
+      // OneSignal durumunu kontrol et
+      final userId = await oneSignalService.getUserId();
+      final hasPermission = await oneSignalService.hasNotificationPermission();
+
+      print('🔔 OneSignal Test - User ID: $userId');
+      print('🔔 OneSignal Test - Has Permission: $hasPermission');
+
+      if (!hasPermission) {
+        await oneSignalService.requestNotificationPermission();
+        await Future.delayed(const Duration(milliseconds: 1000));
+      }
+
+      // Test tag gönder
+      await oneSignalService.sendTags({
+        'test_notification': DateTime.now().toIso8601String(),
+        'app_version': '1.0.0',
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('OneSignal Test Bilgileri:'),
+              Text('User ID: ${userId ?? "null"}'),
+              Text('Permission: $hasPermission'),
+              Text('Test tag gönderildi'),
+            ],
+          ),
+          backgroundColor: const Color(0xFF667EEA),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 5),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('OneSignal Test Hatası: $e'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 }

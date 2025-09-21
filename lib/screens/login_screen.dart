@@ -104,11 +104,34 @@ class _LoginScreenState extends State<LoginScreen>
         }
       } else {
         if (mounted) {
+          String errorMessage = result['message'] ?? 'Giriş işlemi başarısız';
+          
+          // E-posta bulunamadı durumu için özel mesaj
+          if (errorMessage.toLowerCase().contains('email') && 
+              (errorMessage.toLowerCase().contains('not found') || 
+               errorMessage.toLowerCase().contains('bulunamadı') ||
+               errorMessage.toLowerCase().contains('does not exist'))) {
+            errorMessage = 'Bu e-posta adresi kayıtlı değil. Hesap oluşturmayı deneyin.';
+          }
+          // Şifre yanlış durumu için özel mesaj
+          else if (errorMessage.toLowerCase().contains('password') && 
+                   (errorMessage.toLowerCase().contains('incorrect') || 
+                    errorMessage.toLowerCase().contains('wrong') ||
+                    errorMessage.toLowerCase().contains('yanlış'))) {
+            errorMessage = 'Şifre yanlış. Lütfen tekrar deneyin.';
+          }
+          // Genel kimlik doğrulama hatası
+          else if (errorMessage.toLowerCase().contains('credentials') || 
+                   errorMessage.toLowerCase().contains('unauthorized')) {
+            errorMessage = 'E-posta veya şifre hatalı. Lütfen kontrol edin.';
+          }
+          
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(result['message']),
+              content: Text(errorMessage),
               backgroundColor: const Color(AppConstants.errorColorValue),
               behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 4),
             ),
           );
         }

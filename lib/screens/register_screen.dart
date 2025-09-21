@@ -95,22 +95,52 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
         }
       } else {
         if (mounted) {
-          String errorMessage = result['message'];
+          String errorMessage = result['message'] ?? 'Kayıt işlemi başarısız';
+          
+          // E-posta zaten kayıtlı durumu için özel mesaj
+          if (errorMessage.toLowerCase().contains('email') && 
+              (errorMessage.toLowerCase().contains('already') || 
+               errorMessage.toLowerCase().contains('zaten') ||
+               errorMessage.toLowerCase().contains('exists'))) {
+            errorMessage = 'Bu e-posta adresi zaten kayıtlı. Giriş yapmayı deneyin.';
+          }
           
           if (result['errors'] != null) {
-            final errors = result['errors'] as Map<String, dynamic>;
             final errorMessages = <String>[];
+            final errors = result['errors'];
             
-            errors.forEach((key, value) {
-              if (value is List) {
-                errorMessages.addAll(value.cast<String>());
-              } else {
-                errorMessages.add(value.toString());
-              }
-            });
+            if (errors is Map<String, dynamic>) {
+              // errors Map<String, dynamic> türündeyse
+              errors.forEach((key, value) {
+                if (value is List) {
+                  errorMessages.addAll(value.cast<String>());
+                } else {
+                  errorMessages.add(value.toString());
+                }
+              });
+            } else if (errors is List) {
+              // errors List türündeyse
+              errorMessages.addAll(errors.cast<String>());
+            } else {
+              // errors başka bir türdeyse
+              errorMessages.add(errors.toString());
+            }
             
             if (errorMessages.isNotEmpty) {
-              errorMessage = errorMessages.join('\n');
+              // E-posta hatası için özel kontrol
+              final emailError = errorMessages.firstWhere(
+                (msg) => msg.toLowerCase().contains('email') && 
+                        (msg.toLowerCase().contains('already') || 
+                         msg.toLowerCase().contains('zaten') ||
+                         msg.toLowerCase().contains('exists')),
+                orElse: () => '',
+              );
+              
+              if (emailError.isNotEmpty) {
+                errorMessage = 'Bu e-posta adresi zaten kayıtlı. Giriş yapmayı deneyin.';
+              } else {
+                errorMessage = errorMessages.join('\n');
+              }
             }
           }
           

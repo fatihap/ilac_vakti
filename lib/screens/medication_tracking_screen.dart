@@ -21,6 +21,7 @@ class _MedicationTrackingScreenState extends State<MedicationTrackingScreen> {
   DateTime _selectedDate = DateTime.now();
   Map<int, Map<String, bool>> _medicationTracking =
       {}; // medicationId -> {time: taken}
+  Set<String> _savingMedications = {}; // Kaydedilmekte olan ilaçlar
 
   @override
   void initState() {
@@ -120,16 +121,141 @@ class _MedicationTrackingScreenState extends State<MedicationTrackingScreen> {
     });
   }
 
-  void _toggleMedicationTaken(int medicationId, String time) {
+  Future<void> _toggleMedicationTaken(int medicationId, String time) async {
+    final currentStatus = _medicationTracking[medicationId]![time] ?? false;
+    final newStatus = !currentStatus;
+    final savingKey = '${medicationId}_$time';
+    
+    // Loading state'i başlat
     setState(() {
-      _medicationTracking[medicationId]![time] =
-          !(_medicationTracking[medicationId]![time] ?? false);
+      _medicationTracking[medicationId]![time] = newStatus;
+      if (newStatus) {
+        _savingMedications.add(savingKey);
+      }
     });
 
-    // Motivasyonel feedback göster
-    final isTaken = _medicationTracking[medicationId]![time]!;
-    if (isTaken) {
-      _showMotivationalFeedback(true);
+    // API'ye kaydet
+    if (newStatus) {
+      try {
+        final medicationService = MedicationService();
+        final result = await medicationService.markMedicationTaken(
+          medicationId,
+          _selectedDate.toIso8601String().split('T')[0], // YYYY-MM-DD formatında tarih
+          time,
+        );
+
+        if (result['success']) {
+          // Başarılı kayıt - motivasyonel feedback göster
+          _showMotivationalFeedback(true);
+          
+          // Verileri yeniden yükle ve tracking'i güncelle
+          await _loadMedications();
+          
+          print('✅ Medication marked as taken: $medicationId at $time');
+          
+          // Başarı mesajı göster
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(
+                    FontAwesomeIcons.check,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'İlaç başarıyla kaydedildi! 🎉',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ],
+              ),
+              backgroundColor: const Color(0xFF10B981),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        } else {
+          // API hatası - eski duruma döndür
+          setState(() {
+            _medicationTracking[medicationId]![time] = currentStatus;
+          });
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(
+                    FontAwesomeIcons.triangleExclamation,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      result['message'] ?? 'İlaç kaydedilemedi',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ],
+              ),
+              backgroundColor: const Color(0xFFEF4444),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      } catch (e) {
+        // Network hatası - eski duruma döndür
+        setState(() {
+          _medicationTracking[medicationId]![time] = currentStatus;
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(
+                  FontAwesomeIcons.triangleExclamation,
+                  color: Colors.white,
+                  size: 16,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Bağlantı hatası: $e',
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: const Color(0xFFEF4444),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+        print('❌ Error marking medication as taken: $e');
+      } finally {
+        // Loading state'i bitir
+        setState(() {
+          _savingMedications.remove(savingKey);
+        });
+      }
+    } else {
+      // İlaç alınmadı olarak işaretlendi - sadece local güncelleme
+      // (Backend'de "unmark" API'si yoksa sadece UI'da göster)
+      print('ℹ️ Medication unmarked locally: $medicationId at $time');
     }
   }
 
@@ -1033,8 +1159,11 @@ class _MedicationTrackingScreenState extends State<MedicationTrackingScreen> {
                 children: medication.allReminderTimes!.map((time) {
                   final isTaken =
                       _medicationTracking[medication.id!]?[time] ?? false;
+                  final savingKey = '${medication.id!}_$time';
+                  final isSaving = _savingMedications.contains(savingKey);
+                  
                   return GestureDetector(
-                    onTap: () => _toggleMedicationTaken(medication.id!, time),
+                    onTap: isSaving ? null : () async => await _toggleMedicationTaken(medication.id!, time),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16,
@@ -1051,15 +1180,25 @@ class _MedicationTrackingScreenState extends State<MedicationTrackingScreen> {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
-                            isTaken
-                                ? FontAwesomeIcons.check
-                                : FontAwesomeIcons.clock,
-                            size: 16,
-                            color: isTaken
-                                ? Colors.white
-                                : Colors.grey.shade600,
-                          ),
+                          if (isSaving)
+                            SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: isTaken ? Colors.white : const Color(0xFF667EEA),
+                              ),
+                            )
+                          else
+                            Icon(
+                              isTaken
+                                  ? FontAwesomeIcons.check
+                                  : FontAwesomeIcons.clock,
+                              size: 16,
+                              color: isTaken
+                                  ? Colors.white
+                                  : Colors.grey.shade600,
+                            ),
                           const SizedBox(width: 8),
                           Text(
                             time,

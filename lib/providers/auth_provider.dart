@@ -136,6 +136,30 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  // Delete account
+  Future<Map<String, dynamic>> deleteAccount(String password) async {
+    try {
+      final result = await _authService.deleteAccount(password);
+
+      if (result['success']) {
+        // OneSignal'e kullanıcı çıkışını bildir
+        await _oneSignalService.onUserLogout();
+        
+        _user = null;
+        _token = null;
+        _isLoggedIn = false;
+        notifyListeners();
+      }
+
+      return result;
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Bir hata oluştu: $e',
+      };
+    }
+  }
+
   // Refresh user data
   Future<void> refreshUserData() async {
     try {

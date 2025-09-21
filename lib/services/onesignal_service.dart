@@ -16,6 +16,14 @@ class OneSignalService {
       // OneSignal'i başlat
       OneSignal.initialize(AppConstants.oneSignalAppId);
 
+      // iOS için özel ayarlar
+      OneSignal.Notifications.requestPermission(true);
+      
+      // Subscription durumunu dinle
+      OneSignal.User.pushSubscription.addObserver((state) {
+        print('🔔 OneSignal subscription changed: $state');
+      });
+
       _initialized = true;
       print('✅ OneSignal Service initialized');
     } catch (e) {
@@ -109,8 +117,19 @@ class OneSignalService {
   /// Kullanıcı giriş yaptığında çağrılacak
   Future<void> onUserLogin(String userId, {String? email, String? name}) async {
     try {
+      // Önce bildirim iznini kontrol et ve gerekirse iste
+      final hasPermission = await hasNotificationPermission();
+      if (!hasPermission) {
+        await requestNotificationPermission();
+        // Kısa bir bekleme süresi
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
+
       // External User ID ayarla
       await setExternalUserId(userId);
+
+      // Push subscription'ı etkinleştir (iOS için önemli)
+      OneSignal.User.pushSubscription.optIn();
 
       // Kullanıcı bilgilerini tag olarak gönder
       final tags = <String, String>{
@@ -127,6 +146,12 @@ class OneSignalService {
       }
 
       await sendTags(tags);
+
+      // Subscription durumunu logla
+      final subscriptionId = OneSignal.User.pushSubscription.id;
+      final isSubscribed = OneSignal.User.pushSubscription.optedIn;
+      print('📱 OneSignal subscription ID: $subscriptionId');
+      print('📱 OneSignal is subscribed: $isSubscribed');
 
       print('✅ User login processed for OneSignal: $userId');
     } catch (e) {

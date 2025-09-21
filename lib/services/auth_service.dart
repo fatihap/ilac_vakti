@@ -129,4 +129,45 @@ class AuthService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(AppConstants.isLoggedInKey, isLoggedIn);
   }
+
+  // Delete account
+  Future<Map<String, dynamic>> deleteAccount(String password) async {
+    try {
+      final token = await getToken();
+      if (token == null) {
+        return {'success': false, 'message': 'Oturum bulunamadı'};
+      }
+
+      final response = await http.post(
+        Uri.parse('${AppConstants.baseUrl}/api/delete-account'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: json.encode({
+          'password': password,
+        }),
+      );
+
+      final responseData = json.decode(response.body);
+
+      if (response.statusCode == 200) {
+        // Account deleted successfully - clear all local data
+        await logout();
+        return {
+          'success': true,
+          'message': responseData['message'] ?? 'Hesabınız başarıyla silindi',
+        };
+      } else {
+        return {
+          'success': false,
+          'message': responseData['message'] ?? 'Hesap silinemedi',
+          'errors': responseData['errors'],
+        };
+      }
+    } catch (e) {
+      return {'success': false, 'message': 'Bağlantı hatası: $e'};
+    }
+  }
 }

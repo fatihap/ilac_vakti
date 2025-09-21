@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'constants/app_constants.dart';
 import 'providers/auth_provider.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
+import 'screens/onboarding_screen.dart';
+import 'services/onesignal_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,11 +20,9 @@ void main() async {
 
 Future<void> _initializeOneSignal() async {
   try {
-    // OneSignal'i başlat
-    OneSignal.initialize(AppConstants.oneSignalAppId);
-    
-    // Bildirim izni iste
-    await OneSignal.Notifications.requestPermission(true);
+    // OneSignal servisini başlat
+    final oneSignalService = OneSignalService();
+    await oneSignalService.initialize();
     
     // Kullanıcı ID'sini al
     final deviceState = await OneSignal.User.getOnesignalId();
@@ -39,8 +40,9 @@ Future<void> _initializeOneSignal() async {
     OneSignal.Notifications.addForegroundWillDisplayListener((event) {
       print('🔔 Notification received in foreground: ${event.notification.body}');
       
-      // Bildirimi göster (display metodu yerine notification'ı göster)
-      // event.display(); // Bu metot yok, sadece log yazıyoruz
+      // Bildirimi göster
+      event.preventDefault();
+      event.notification.display();
     });
     
     print('✅ OneSignal initialized successfully');
@@ -165,18 +167,77 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class AuthWrapper extends StatelessWidget {
+class AuthWrapper extends StatefulWidget {
   const AuthWrapper({super.key});
 
   @override
+  State<AuthWrapper> createState() => _AuthWrapperState();
+}
+
+class _AuthWrapperState extends State<AuthWrapper> {
+  bool? _isFirstLaunch;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkFirstLaunch();
+  }
+
+  Future<void> _checkFirstLaunch() async {
+    final prefs = await SharedPreferences.getInstance();
+    final onboardingCompleted = prefs.getBool('onboarding_completed') ?? false;
+    
+    setState(() {
+      _isFirstLaunch = !onboardingCompleted;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Onboarding kontrolü yapılıyor
+    if (_isFirstLaunch == null) {
+      return const Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.medical_services,
+                size: 80,
+                color: Color(AppConstants.primaryColorValue),
+              ),
+              SizedBox(height: 20),
+              CircularProgressIndicator(
+                color: Color(AppConstants.primaryColorValue),
+              ),
+              SizedBox(height: 20),
+              Text(
+                AppConstants.appName,
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Color(AppConstants.primaryColorValue),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // İlk kez açılıyorsa onboarding göster
+    if (_isFirstLaunch!) {
+      return const OnboardingScreen();
+    }
+
+    // Onboarding tamamlandıysa normal auth kontrolü yap
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
         if (authProvider.isLoading) {
           return const Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
                     Icons.medical_services,
@@ -188,17 +249,17 @@ class AuthWrapper extends StatelessWidget {
                     color: Color(AppConstants.primaryColorValue),
                   ),
                   SizedBox(height: 20),
-            Text(
+                  Text(
                     AppConstants.appName,
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                       color: Color(AppConstants.primaryColorValue),
                     ),
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
-      ),
           );
         }
 
