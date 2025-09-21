@@ -121,10 +121,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   color: const Color(0xFF10B981).withOpacity(0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Text(
-                  _getMedicationEmoji(medication.medicationType),
-                  style: const TextStyle(fontSize: 24),
-                ),
+                        child: Text(
+                          _getMedicationEmoji(medication.medicationType),
+                          style: const TextStyle(fontSize: 24),
+                        ),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -328,13 +328,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            '${medication.name} başarıyla alındı! 🎉',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                            Text(
+                              '${medication.name} başarıyla alındı!',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
                             ),
-                          ),
                           Text(
                             _getSuccessMessage(),
                             style: const TextStyle(
@@ -427,12 +427,12 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                               12,
                                             ),
                                           ),
-                                          child: Text(
-                                            _getGreetingEmoji(),
-                                            style: const TextStyle(
-                                              fontSize: 20,
-                                            ),
-                                          ),
+                          child: Text(
+                            _getGreetingEmoji(),
+                            style: const TextStyle(
+                              fontSize: 20,
+                            ),
+                          ),
                                         ),
                                         const SizedBox(width: 12),
                                         Expanded(
@@ -780,9 +780,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               decoration: BoxDecoration(
                 color: color.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(18),
+                border: Border.all(
+                  color: color.withOpacity(0.2),
+                  width: 2,
+                ),
               ),
-              child: Center(
-                child: Text(emoji, style: const TextStyle(fontSize: 28)),
+              child: Text(
+                emoji,
+                style: const TextStyle(fontSize: 28),
               ),
             ),
             const SizedBox(height: 12),
@@ -833,8 +838,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 color: const Color(0xFF667EEA).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: const Center(
-                child: Text('💊', style: TextStyle(fontSize: 40)),
+              child: const Text(
+                '💊',
+                style: TextStyle(fontSize: 40),
               ),
             ),
             const SizedBox(height: 16),
@@ -861,151 +867,285 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         print(
           '🏥 Rendering medication: ${medication.name} (ID: ${medication.id})',
         );
+        final medicationColor = _getMedicationIconColor(medication.medicationType);
+        final progressColor = _getProgressColor(medication);
+        
         return GestureDetector(
           onTap: () => _editMedication(medication),
           onLongPress: () => _showMedicationOptions(medication),
           child: Container(
             margin: const EdgeInsets.only(bottom: 16),
-            padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(24),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
-                  blurRadius: 20,
+                  color: medicationColor.withOpacity(0.08),
+                  blurRadius: 24,
                   offset: const Offset(0, 8),
                 ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        const Color(0xFF667EEA).withOpacity(0.8),
-                        const Color(0xFF764BA2).withOpacity(0.8),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Center(
-                    child: Text(
-                      _getMedicationEmoji(medication.medicationType),
-                      style: const TextStyle(fontSize: 24),
-                    ),
-                  ),
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+              ],
+              border: Border.all(
+                color: medicationColor.withOpacity(0.1),
+                width: 1,
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  // Header row
+                  Row(
                     children: [
-                      Text(
-                        medication.name,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1E293B),
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        medication.dosage ?? medication.description,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Color(0xFF64748B),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Icon(
-                            FontAwesomeIcons.repeat,
-                            size: 12,
-                            color: const Color(0xFF667EEA),
+                      // Modern icon container
+                      Container(
+                        width: 64,
+                        height: 64,
+                        decoration: BoxDecoration(
+                          color: medicationColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: medicationColor.withOpacity(0.2),
+                            width: 2,
                           ),
-                          const SizedBox(width: 4),
-                          Text(
-                            medication.frequencyDescription,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Color(0xFF667EEA),
-                              fontWeight: FontWeight.w500,
+                        ),
+                        child: Text(
+                          _getMedicationEmoji(medication.medicationType),
+                          style: const TextStyle(fontSize: 28),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      
+                      // Medication info
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    medication.name,
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF1E293B),
+                                    ),
+                                  ),
+                                ),
+                                // Status badge
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: progressColor.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        medication.isCompletedToday == true
+                                            ? FontAwesomeIcons.checkCircle
+                                            : FontAwesomeIcons.clock,
+                                        size: 12,
+                                        color: progressColor,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        _getProgressText(medication),
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                          color: progressColor,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 6),
+                            if (medication.dosage != null)
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade50,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      FontAwesomeIcons.chartSimple,
+                                      size: 12,
+                                      color: Colors.grey.shade600,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      medication.dosage!,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey.shade700,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            else
+                              Text(
+                                medication.description,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.grey.shade600,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            const SizedBox(height: 8),
+                            // Frequency info
+                            Row(
+                              children: [
+                                Icon(
+                                  FontAwesomeIcons.repeat,
+                                  size: 12,
+                                  color: medicationColor,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  medication.frequencyDescription,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: medicationColor,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
-                ),
-                Column(
-                  children: [
-                    // Progress indicator
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: _getProgressColor(medication).withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (medication.isCompletedToday == true) ...[
-                            const Icon(
-                              FontAwesomeIcons.check,
-                              size: 12,
-                              color: Colors.green,
-                            ),
-                            const SizedBox(width: 4),
-                          ],
-                          Text(
-                            _getProgressText(medication),
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: _getProgressColor(medication),
-                            ),
+                  
+                  const SizedBox(height: 16),
+                  
+                  // Progress bar
+                  Container(
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                    child: FractionallySizedBox(
+                      alignment: Alignment.centerLeft,
+                      widthFactor: (medication.todayCompletionPercentage ?? 0) / 100,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              progressColor,
+                              progressColor.withOpacity(0.7),
+                            ],
                           ),
-                        ],
+                          borderRadius: BorderRadius.circular(3),
+                        ),
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    ElevatedButton(
-                      onPressed: () => _takeMedication(medication),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: medication.isCompletedToday == true
-                            ? Colors.green
-                            : const Color(0xFF10B981),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
+                  ),
+                  
+                  const SizedBox(height: 16),
+                  
+                  // Action buttons row
+                  Row(
+                    children: [
+                      // Take medication button
+                      Expanded(
+                        flex: 2,
+                        child: ElevatedButton(
+                          onPressed: () => _takeMedication(medication),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: medication.isCompletedToday == true
+                                ? Colors.green
+                                : medicationColor,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                medication.isCompletedToday == true
+                                    ? FontAwesomeIcons.checkCircle
+                                    : FontAwesomeIcons.pills,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                medication.isCompletedToday == true
+                                    ? 'Tamamlandı'
+                                    : 'İlaç Al',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        shape: RoundedRectangleBorder(
+                      ),
+                      
+                      const SizedBox(width: 12),
+                      
+                      // Quick actions
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade50,
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        elevation: 0,
-                      ),
-                      child: Text(
-                        medication.isCompletedToday == true
-                            ? 'Tamamlandı ✓'
-                            : 'İlaç Al',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              onPressed: () => _editMedication(medication),
+                              icon: Icon(
+                                FontAwesomeIcons.edit,
+                                size: 18,
+                                color: Colors.grey.shade600,
+                              ),
+                              tooltip: 'Düzenle',
+                            ),
+                            IconButton(
+                              onPressed: () => _showMedicationOptions(medication),
+                              icon: Icon(
+                                FontAwesomeIcons.ellipsisVertical,
+                                size: 18,
+                                color: Colors.grey.shade600,
+                              ),
+                              tooltip: 'Seçenekler',
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -1073,11 +1213,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             ),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Center(
-                            child: Text(
-                              _getMedicationEmoji(medication.medicationType),
-                              style: const TextStyle(fontSize: 20),
-                            ),
+                          child: Text(
+                            _getMedicationEmoji(medication.medicationType),
+                            style: const TextStyle(fontSize: 20),
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -1332,6 +1470,27 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         return '💨';
       default:
         return '💊';
+    }
+  }
+
+  Color _getMedicationIconColor(String? medicationType) {
+    switch (medicationType) {
+      case 'tablet':
+        return const Color(0xFF3B82F6);
+      case 'capsule':
+        return const Color(0xFF8B5CF6);
+      case 'syrup':
+        return const Color(0xFFF59E0B);
+      case 'drops':
+        return const Color(0xFF06B6D4);
+      case 'injection':
+        return const Color(0xFFEF4444);
+      case 'cream':
+        return const Color(0xFF10B981);
+      case 'spray':
+        return const Color(0xFF84CC16);
+      default:
+        return const Color(0xFF6B7280);
     }
   }
 

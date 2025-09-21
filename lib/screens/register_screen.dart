@@ -111,13 +111,13 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
             
             if (errors is Map<String, dynamic>) {
               // errors Map<String, dynamic> türündeyse
-              errors.forEach((key, value) {
-                if (value is List) {
-                  errorMessages.addAll(value.cast<String>());
-                } else {
-                  errorMessages.add(value.toString());
-                }
-              });
+            errors.forEach((key, value) {
+              if (value is List) {
+                errorMessages.addAll(value.cast<String>());
+              } else {
+                errorMessages.add(value.toString());
+              }
+            });
             } else if (errors is List) {
               // errors List türündeyse
               errorMessages.addAll(errors.cast<String>());
@@ -139,7 +139,7 @@ class _RegisterScreenState extends State<RegisterScreen> with TickerProviderStat
               if (emailError.isNotEmpty) {
                 errorMessage = 'Bu e-posta adresi zaten kayıtlı. Giriş yapmayı deneyin.';
               } else {
-                errorMessage = errorMessages.join('\n');
+              errorMessage = errorMessages.join('\n');
               }
             }
           }
