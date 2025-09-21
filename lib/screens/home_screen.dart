@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -121,10 +122,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   color: const Color(0xFF10B981).withOpacity(0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                        child: Text(
-                          _getMedicationEmoji(medication.medicationType),
-                          style: const TextStyle(fontSize: 24),
-                        ),
+                child: Icon(
+                  _getMedicationIcon(medication.medicationType),
+                  size: 24,
+                  color: Colors.white,
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -328,13 +330,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                            Text(
-                              '${medication.name} başarıyla alındı!',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
+                          Text(
+                            '${medication.name} başarıyla alındı!',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
                             ),
+                          ),
                           Text(
                             _getSuccessMessage(),
                             style: const TextStyle(
@@ -380,244 +382,244 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           opacity: _fadeAnimation,
           child: CustomScrollView(
             slivers: [
-              // Modern Header
               SliverToBoxAdapter(
                 child: Container(
-                  margin: const EdgeInsets.all(20),
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        const Color(0xFF667EEA),
-                        const Color(0xFF764BA2),
-                      ],
-                    ),
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF667EEA).withOpacity(0.3),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
+                  margin: const EdgeInsets.fromLTRB(20, 20, 20, 10),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Consumer<AuthProvider>(
-                            builder: (context, authProvider, child) {
-                              return Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.all(8),
-                                          decoration: BoxDecoration(
-                                            color: Colors.white.withOpacity(
-                                              0.2,
-                                            ),
-                                            borderRadius: BorderRadius.circular(
-                                              12,
-                                            ),
-                                          ),
-                          child: Text(
-                            _getGreetingEmoji(),
-                            style: const TextStyle(
-                              fontSize: 20,
+                      Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              const Color(0xFF4F46E5),
+                              const Color(0xFF7C3AED),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF4F46E5).withOpacity(0.25),
+                              blurRadius: 20,
+                              offset: const Offset(0, 8),
                             ),
-                          ),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                _getGreetingMessage(),
-                                                style: const TextStyle(
-                                                  fontSize: 18,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: Colors.white70,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 4),
-                                              Text(
-                                                '${authProvider.user?.name ?? 'Kullanıcı'} 👋',
-                                                style: const TextStyle(
-                                                  fontSize: 22,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 12),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 16,
-                                        vertical: 8,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withOpacity(0.15),
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: Text(
-                                        _getHealthMessage(),
-                                        style: const TextStyle(
-                                          fontSize: 14,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                          Consumer<AuthProvider>(
-                            builder: (context, authProvider, child) {
-                              return PopupMenuButton<String>(
-                                icon: Container(
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            // User Info Row
+                            Row(
+                              children: [
+                                Container(
                                   padding: const EdgeInsets.all(12),
                                   decoration: BoxDecoration(
                                     color: Colors.white.withOpacity(0.2),
                                     borderRadius: BorderRadius.circular(16),
                                   ),
                                   child: const Icon(
-                                    FontAwesomeIcons.user,
+                                    FontAwesomeIcons.userDoctor,
+                                    size: 24,
                                     color: Colors.white,
-                                    size: 20,
                                   ),
                                 ),
-                                onSelected: (value) async {
-                                  if (value == 'logout') {
-                                    await authProvider.logout();
-                                    if (context.mounted) {
-                                      Navigator.of(context).pushAndRemoveUntil(
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              const LoginScreen(),
-                                        ),
-                                        (route) => false,
-                                      );
-                                    }
-                                  } else if (value == 'onboarding') {
-                                    // Onboarding'i sıfırla ve göster
-                                    final prefs =
-                                        await SharedPreferences.getInstance();
-                                    await prefs.remove('onboarding_completed');
-
-                                    if (context.mounted) {
-                                      Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                          builder: (context) =>
-                                              const OnboardingScreen(),
-                                        ),
-                                      );
-                                    }
-                                  } else if (value == 'delete_account') {
-                                    _showDeleteAccountDialog(authProvider);
-                                  }
-                                },
-                                itemBuilder: (BuildContext context) => [
-                                  PopupMenuItem<String>(
-                                    value: 'profile',
-                                    child: Row(
-                                      children: [
-                                        const Icon(
-                                          FontAwesomeIcons.user,
-                                          size: 16,
-                                        ),
-                                        const SizedBox(width: 12),
-                                        Text(
-                                          '${authProvider.user?.name ?? ''} ${authProvider.user?.surname ?? ''}',
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const PopupMenuDivider(),
-
-                                  const PopupMenuItem<String>(
-                                    value: 'delete_account',
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          FontAwesomeIcons.userXmark,
-                                          size: 16,
-                                          color: Colors.red,
-                                        ),
-                                        SizedBox(width: 12),
-                                        Text(
-                                          'Hesap Sil',
-                                          style: TextStyle(color: Colors.red),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const PopupMenuDivider(),
-                                  const PopupMenuItem<String>(
-                                    value: 'logout',
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          FontAwesomeIcons.signOutAlt,
-                                          size: 16,
-                                          color: Colors.red,
-                                        ),
-                                        SizedBox(width: 12),
-                                        Text(
-                                          'Çıkış Yap',
-                                          style: TextStyle(color: Colors.red),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-
-                      // Stats Row
-                      _isLoading
-                          ? const Center(
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                              ),
-                            )
-                          : Row(
-                              children: [
+                                const SizedBox(width: 16),
                                 Expanded(
-                                  child: _buildStatItem(
-                                    'Bugünkü İlaçlar',
-                                    _todaysMedications.length.toString(),
-                                    FontAwesomeIcons.pills,
+                                  child: Consumer<AuthProvider>(
+                                    builder: (context, authProvider, child) {
+                                      return Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            _getGreetingMessage(),
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              color: Colors.white.withOpacity(
+                                                0.9,
+                                              ),
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            authProvider.user?.name ??
+                                                'Kullanıcı',
+                                            style: const TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ],
+                                      );
+                                    },
                                   ),
                                 ),
-                                const SizedBox(width: 20),
-                                Expanded(
-                                  child: _buildStatItem(
-                                    'Toplam İlaç',
-                                    _allMedications.length.toString(),
-                                    FontAwesomeIcons.capsules,
-                                  ),
+                                Consumer<AuthProvider>(
+                                  builder: (context, authProvider, child) {
+                                    return PopupMenuButton<String>(
+                                      icon: Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white.withOpacity(0.2),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                        child: const Icon(
+                                          FontAwesomeIcons.ellipsisVertical,
+                                          color: Colors.white,
+                                          size: 16,
+                                        ),
+                                      ),
+                                      onSelected: (value) async {
+                                        if (value == 'logout') {
+                                          await authProvider.logout();
+                                          if (context.mounted) {
+                                            Navigator.of(
+                                              context,
+                                            ).pushAndRemoveUntil(
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    const LoginScreen(),
+                                              ),
+                                              (route) => false,
+                                            );
+                                          }
+                                        } else if (value == 'onboarding') {
+                                          final prefs =
+                                              await SharedPreferences.getInstance();
+                                          await prefs.remove(
+                                            'onboarding_completed',
+                                          );
+                                          if (context.mounted) {
+                                            Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    const OnboardingScreen(),
+                                              ),
+                                            );
+                                          }
+                                        } else if (value == 'delete_account') {
+                                          _showDeleteAccountDialog(
+                                            authProvider,
+                                          );
+                                        }
+                                      },
+                                      itemBuilder: (BuildContext context) => [
+                                        PopupMenuItem<String>(
+                                          value: 'profile',
+                                          child: Row(
+                                            children: [
+                                              const Icon(
+                                                FontAwesomeIcons.user,
+                                                size: 16,
+                                              ),
+                                              const SizedBox(width: 12),
+                                              Text(
+                                                '${authProvider.user?.name ?? ''} ${authProvider.user?.surname ?? ''}',
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        const PopupMenuDivider(),
+                                        if (Platform.isIOS) ...[
+                                          const PopupMenuItem<String>(
+                                            value: 'delete_account',
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  FontAwesomeIcons.userXmark,
+                                                  size: 16,
+                                                  color: Colors.red,
+                                                ),
+                                                SizedBox(width: 12),
+                                                Text(
+                                                  'Hesap Sil',
+                                                  style: TextStyle(
+                                                    color: Colors.red,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          const PopupMenuDivider(),
+                                        ],
+                                        const PopupMenuItem<String>(
+                                          value: 'logout',
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                FontAwesomeIcons.signOutAlt,
+                                                size: 16,
+                                                color: Colors.red,
+                                              ),
+                                              SizedBox(width: 12),
+                                              Text(
+                                                'Çıkış Yap',
+                                                style: TextStyle(
+                                                  color: Colors.red,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  },
                                 ),
                               ],
                             ),
+
+                            const SizedBox(height: 20),
+
+                            // Health Message
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.15),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: Colors.white.withOpacity(0.2),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.2),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: const Icon(
+                                      FontAwesomeIcons.heartPulse,
+                                      size: 16,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      _getHealthMessage(),
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w500,
+                                        height: 1.3,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
                     ],
                   ),
                 ),
@@ -650,7 +652,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         children: [
                           _buildActionCard(
                             'İlaç Ekle',
-                            '💊',
+                            FontAwesomeIcons.plus,
                             const Color(0xFF10B981),
                             () async {
                               final result = await Navigator.of(context).push(
@@ -666,7 +668,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                           ),
                           _buildActionCard(
                             'İlaç Takibi',
-                            '📊',
+                            FontAwesomeIcons.chartLine,
                             const Color(0xFF3B82F6),
                             () async {
                               await Navigator.of(context).push(
@@ -712,37 +714,56 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildStatItem(String title, String value, IconData icon) {
+  Widget _buildElegantStatCard(
+    String title,
+    String value,
+    IconData icon,
+    Color primaryColor,
+    Color secondaryColor,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: primaryColor.withOpacity(0.1),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Icon(icon, color: Colors.white, size: 24),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [primaryColor, secondaryColor],
               ),
-            ],
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: Colors.white, size: 20),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: primaryColor,
+            ),
+          ),
+          const SizedBox(height: 4),
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Colors.white70,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey.shade600,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -753,7 +774,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   Widget _buildActionCard(
     String title,
-    String emoji,
+    IconData icon,
     Color color,
     VoidCallback onTap,
   ) {
@@ -780,15 +801,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               decoration: BoxDecoration(
                 color: color.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(18),
-                border: Border.all(
-                  color: color.withOpacity(0.2),
-                  width: 2,
-                ),
+                border: Border.all(color: color.withOpacity(0.2), width: 2),
               ),
-              child: Text(
-                emoji,
-                style: const TextStyle(fontSize: 28),
-              ),
+              child: Icon(icon, size: 28, color: color),
             ),
             const SizedBox(height: 12),
             Text(
@@ -838,9 +853,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 color: const Color(0xFF667EEA).withOpacity(0.1),
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: const Text(
-                '💊',
-                style: TextStyle(fontSize: 40),
+              child: const Icon(
+                FontAwesomeIcons.pills,
+                size: 40,
+                color: Color(0xFF667EEA),
               ),
             ),
             const SizedBox(height: 16),
@@ -867,224 +883,270 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         print(
           '🏥 Rendering medication: ${medication.name} (ID: ${medication.id})',
         );
-        final medicationColor = _getMedicationIconColor(medication.medicationType);
+        final medicationColor = _getMedicationIconColor(
+          medication.medicationType,
+        );
         final progressColor = _getProgressColor(medication);
-        
-        return GestureDetector(
-          onTap: () => _editMedication(medication),
-          onLongPress: () => _showMedicationOptions(medication),
-          child: Container(
-            margin: const EdgeInsets.only(bottom: 16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                BoxShadow(
-                  color: medicationColor.withOpacity(0.08),
-                  blurRadius: 24,
-                  offset: const Offset(0, 8),
-                ),
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-              border: Border.all(
-                color: medicationColor.withOpacity(0.1),
-                width: 1,
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: 16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
               ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  // Header row
-                  Row(
-                    children: [
-                      // Modern icon container
-                      Container(
-                        width: 64,
-                        height: 64,
-                        decoration: BoxDecoration(
-                          color: medicationColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(
-                            color: medicationColor.withOpacity(0.2),
-                            width: 2,
-                          ),
-                        ),
-                        child: Text(
-                          _getMedicationEmoji(medication.medicationType),
-                          style: const TextStyle(fontSize: 28),
-                        ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: Stack(
+              children: [
+                // Gradient accent bar on the left
+                Positioned(
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  child: Container(
+                    width: 4,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          medicationColor,
+                          medicationColor.withOpacity(0.6),
+                        ],
                       ),
-                      const SizedBox(width: 16),
-                      
-                      // Medication info
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
+                    ),
+                  ),
+                ),
+
+                // Main content
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    children: [
+                      // Header section
+                      Row(
+                        children: [
+                          // Icon with floating effect
+                          Container(
+                            width: 56,
+                            height: 56,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  medicationColor.withOpacity(0.15),
+                                  medicationColor.withOpacity(0.08),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: medicationColor.withOpacity(0.2),
+                                width: 1.5,
+                              ),
+                            ),
+                            child: Icon(
+                              _getMedicationIcon(medication.medicationType),
+                              size: 24,
+                              color: medicationColor,
+                            ),
+                          ),
+
+                          const SizedBox(width: 16),
+
+                          // Medication details
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Expanded(
-                                  child: Text(
-                                    medication.name,
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF1E293B),
-                                    ),
-                                  ),
-                                ),
-                                // Status badge
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: progressColor.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        medication.isCompletedToday == true
-                                            ? FontAwesomeIcons.checkCircle
-                                            : FontAwesomeIcons.clock,
-                                        size: 12,
-                                        color: progressColor,
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        _getProgressText(medication),
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w600,
-                                          color: progressColor,
+                                // Name and status
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        medication.name,
+                                        style: const TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFF1E293B),
+                                          letterSpacing: -0.5,
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 6),
-                            if (medication.dosage != null)
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.shade50,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      FontAwesomeIcons.chartSimple,
-                                      size: 12,
-                                      color: Colors.grey.shade600,
                                     ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      medication.dosage!,
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey.shade700,
-                                        fontWeight: FontWeight.w500,
+                                    // Modern status indicator
+                                    Container(
+                                      width: 12,
+                                      height: 12,
+                                      decoration: BoxDecoration(
+                                        color: progressColor,
+                                        shape: BoxShape.circle,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: progressColor.withOpacity(
+                                              0.3,
+                                            ),
+                                            blurRadius: 6,
+                                            spreadRadius: 1,
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ],
                                 ),
-                              )
-                            else
-                              Text(
-                                medication.description,
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.grey.shade600,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            const SizedBox(height: 8),
-                            // Frequency info
-                            Row(
-                              children: [
-                                Icon(
-                                  FontAwesomeIcons.repeat,
-                                  size: 12,
-                                  color: medicationColor,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  medication.frequencyDescription,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: medicationColor,
-                                    fontWeight: FontWeight.w500,
-                                  ),
+
+                                const SizedBox(height: 8),
+
+                                // Dosage and frequency row
+                                Row(
+                                  children: [
+                                    if (medication.dosage != null) ...[
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 3,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey.shade100,
+                                          borderRadius: BorderRadius.circular(
+                                            6,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          medication.dosage!,
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.grey.shade700,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                    ],
+                                    Expanded(
+                                      child: Text(
+                                        medication.frequencyDescription,
+                                        style: TextStyle(
+                                          fontSize: 13,
+                                          color: Colors.grey.shade600,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
-                          ],
-                        ),
+                          ),
+
+                          // Menu button
+                          GestureDetector(
+                            onTap: () => _showMedicationOptions(medication),
+                            child: Container(
+                              width: 32,
+                              height: 32,
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade100,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(
+                                FontAwesomeIcons.ellipsisVertical,
+                                size: 14,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  
-                  const SizedBox(height: 16),
-                  
-                  // Progress bar
-                  Container(
-                    height: 6,
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(3),
-                    ),
-                    child: FractionallySizedBox(
-                      alignment: Alignment.centerLeft,
-                      widthFactor: (medication.todayCompletionPercentage ?? 0) / 100,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              progressColor,
-                              progressColor.withOpacity(0.7),
+
+                      const SizedBox(height: 20),
+
+                      // Progress section
+                      Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Günlük İlerleme',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.grey.shade600,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              Text(
+                                '${(medication.todayCompletionPercentage ?? 0).toInt()}%',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: progressColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ],
                           ),
-                          borderRadius: BorderRadius.circular(3),
-                        ),
+
+                          const SizedBox(height: 8),
+
+                          // Modern progress bar
+                          Container(
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade100,
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: FractionallySizedBox(
+                              alignment: Alignment.centerLeft,
+                              widthFactor:
+                                  (medication.todayCompletionPercentage ?? 0) /
+                                  100,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      progressColor,
+                                      progressColor.withOpacity(0.8),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(4),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: progressColor.withOpacity(0.3),
+                                      blurRadius: 4,
+                                      spreadRadius: 1,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 16),
-                  
-                  // Action buttons row
-                  Row(
-                    children: [
-                      // Take medication button
-                      Expanded(
-                        flex: 2,
+
+                      const SizedBox(height: 20),
+
+                      // Action button
+                      SizedBox(
+                        width: double.infinity,
                         child: ElevatedButton(
                           onPressed: () => _takeMedication(medication),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: medication.isCompletedToday == true
-                                ? Colors.green
+                                ? Colors.green.shade400
                                 : medicationColor,
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
                             elevation: 0,
+                            shadowColor: Colors.transparent,
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -1093,59 +1155,27 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 medication.isCompletedToday == true
                                     ? FontAwesomeIcons.checkCircle
                                     : FontAwesomeIcons.pills,
-                                size: 16,
+                                size: 18,
                               ),
-                              const SizedBox(width: 8),
+                              const SizedBox(width: 10),
                               Text(
                                 medication.isCompletedToday == true
                                     ? 'Tamamlandı'
                                     : 'İlaç Al',
                                 style: const TextStyle(
-                                  fontSize: 14,
+                                  fontSize: 15,
                                   fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.2,
                                 ),
                               ),
                             ],
                           ),
                         ),
                       ),
-                      
-                      const SizedBox(width: 12),
-                      
-                      // Quick actions
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade50,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              onPressed: () => _editMedication(medication),
-                              icon: Icon(
-                                FontAwesomeIcons.edit,
-                                size: 18,
-                                color: Colors.grey.shade600,
-                              ),
-                              tooltip: 'Düzenle',
-                            ),
-                            IconButton(
-                              onPressed: () => _showMedicationOptions(medication),
-                              icon: Icon(
-                                FontAwesomeIcons.ellipsisVertical,
-                                size: 18,
-                                color: Colors.grey.shade600,
-                              ),
-                              tooltip: 'Seçenekler',
-                            ),
-                          ],
-                        ),
-                      ),
                     ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         );
@@ -1213,9 +1243,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             ),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Text(
-                            _getMedicationEmoji(medication.medicationType),
-                            style: const TextStyle(fontSize: 20),
+                          child: Icon(
+                            _getMedicationIcon(medication.medicationType),
+                            size: 20,
+                            color: Colors.white,
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -1418,7 +1449,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             SnackBar(
               content: Row(
                 children: [
-                  const Text('🗑️'),
+                  const Icon(
+                    FontAwesomeIcons.trash,
+                    color: Colors.white,
+                    size: 16,
+                  ),
                   const SizedBox(width: 8),
                   Text('${medication.name} başarıyla silindi!'),
                 ],
@@ -1452,24 +1487,24 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
   }
 
-  String _getMedicationEmoji(String? medicationType) {
+  IconData _getMedicationIcon(String? medicationType) {
     switch (medicationType) {
       case 'tablet':
-        return '💊';
+        return FontAwesomeIcons.pills;
       case 'capsule':
-        return '💉';
+        return FontAwesomeIcons.syringe;
       case 'syrup':
-        return '🍯';
+        return FontAwesomeIcons.bottleDroplet;
       case 'drops':
-        return '💧';
+        return FontAwesomeIcons.droplet;
       case 'injection':
-        return '💉';
+        return FontAwesomeIcons.syringe;
       case 'cream':
-        return '🧴';
+        return FontAwesomeIcons.soap;
       case 'spray':
-        return '💨';
+        return FontAwesomeIcons.sprayCan;
       default:
-        return '💊';
+        return FontAwesomeIcons.pills;
     }
   }
 
@@ -1518,9 +1553,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     }
   }
 
-  String _getGreetingEmoji() {
-    return MessageService.getGreetingEmoji();
-  }
+  // Greeting emoji metodu kaldırıldı - artık ikon kullanılıyor
 
   String _getGreetingMessage() {
     return MessageService.getGreetingMessage();

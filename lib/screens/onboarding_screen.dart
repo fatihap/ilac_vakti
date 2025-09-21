@@ -21,21 +21,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       description: 'İlaç Vakti ile sağlıklı yaşamınıza düzen getirin. Artık hiçbir dozunuzu kaçırmayacaksınız!',
       icon: FontAwesomeIcons.pills,
       gradient: [const Color(0xFF667EEA), const Color(0xFF764BA2)],
-      illustration: '💊',
     ),
     OnboardingPage(
       title: 'Akıllı Hatırlatmalar',
       description: 'Kişiselleştirilmiş bildirimlerle ilaçlarınızı tam zamanında alın. Kaçan dozlar için otomatik tekrar hatırlatma!',
       icon: FontAwesomeIcons.bell,
       gradient: [const Color(0xFF11998E), const Color(0xFF38EF7D)],
-      illustration: '🔔',
     ),
     OnboardingPage(
       title: 'Sağlığınız Öncelik',
       description: 'İlaç geçmişinizi takip edin, dozlarınızı kaydedin ve sağlıklı yaşam alışkanlıkları edinin.',
       icon: FontAwesomeIcons.heartPulse,
       gradient: [const Color(0xFFFF6B6B), const Color(0xFFFFE66D)],
-      illustration: '❤️',
     ),
   ];
 
@@ -109,9 +106,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         color: Colors.white.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Text(
-                        '💊',
-                        style: TextStyle(fontSize: 24),
+                      child: const Icon(
+                        FontAwesomeIcons.pills,
+                        size: 24,
+                        color: Colors.white,
                       ),
                     ),
                     // Skip button
@@ -290,32 +288,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       shape: BoxShape.circle,
                     ),
                     child: Center(
-                      child: Text(
-                        page.illustration,
-                        style: TextStyle(
-                          fontSize: isSmallScreen ? 60 : 70,
-                        ),
+                      child: Icon(
+                        page.icon,
+                        size: isSmallScreen ? 60 : 70,
+                        color: Colors.white,
                       ),
                     ),
                   ),
 
-                  SizedBox(height: isSmallScreen ? 24 : 32),
-
-                  // Icon
-                  Container(
-                    padding: EdgeInsets.all(isSmallScreen ? 12 : 16),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Icon(
-                      page.icon,
-                      size: isSmallScreen ? 24 : 28,
-                      color: Colors.white,
-                    ),
-                  ),
-
-                  SizedBox(height: isSmallScreen ? 20 : 28),
+                  SizedBox(height: isSmallScreen ? 32 : 48),
 
                   // Title - responsive font size
                   Text(
@@ -364,13 +345,11 @@ class OnboardingPage {
   final String description;
   final IconData icon;
   final List<Color> gradient;
-  final String illustration;
 
   OnboardingPage({
     required this.title,
     required this.description,
     required this.icon,
     required this.gradient,
-    required this.illustration,
   });
 }

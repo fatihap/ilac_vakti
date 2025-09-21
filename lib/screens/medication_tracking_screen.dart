@@ -985,9 +985,10 @@ class _MedicationTrackingScreenState extends State<MedicationTrackingScreen> {
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Center(
-                    child: Text(
-                      _getMedicationEmoji(medication.medicationType),
-                      style: const TextStyle(fontSize: 24),
+                    child: Icon(
+                      _getMedicationIcon(medication.medicationType),
+                      size: 24,
+                      color: Colors.white,
                     ),
                   ),
                 ),
@@ -1222,24 +1223,24 @@ class _MedicationTrackingScreenState extends State<MedicationTrackingScreen> {
     );
   }
 
-  String _getMedicationEmoji(String? medicationType) {
+  IconData _getMedicationIcon(String? medicationType) {
     switch (medicationType) {
       case 'tablet':
-        return '💊';
+        return FontAwesomeIcons.pills;
       case 'capsule':
-        return '💉';
+        return FontAwesomeIcons.syringe;
       case 'syrup':
-        return '🍯';
+        return FontAwesomeIcons.bottleDroplet;
       case 'drops':
-        return '💧';
+        return FontAwesomeIcons.droplet;
       case 'injection':
-        return '💉';
+        return FontAwesomeIcons.syringe;
       case 'cream':
-        return '🧴';
+        return FontAwesomeIcons.soap;
       case 'spray':
-        return '💨';
+        return FontAwesomeIcons.sprayCan;
       default:
-        return '💊';
+        return FontAwesomeIcons.pills;
     }
   }
 
