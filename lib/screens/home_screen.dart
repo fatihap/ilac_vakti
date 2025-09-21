@@ -8,7 +8,6 @@ import '../providers/auth_provider.dart';
 import '../models/medication_model.dart';
 import '../services/medication_service.dart';
 import '../services/message_service.dart';
-import '../services/onesignal_service.dart';
 import 'login_screen.dart';
 import 'add_medication_screen.dart';
 import 'medication_tracking_screen.dart';
@@ -710,64 +709,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildElegantStatCard(
-    String title,
-    String value,
-    IconData icon,
-    Color primaryColor,
-    Color secondaryColor,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: primaryColor.withOpacity(0.1),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [primaryColor, secondaryColor],
-              ),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: Colors.white, size: 20),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.bold,
-              color: primaryColor,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey.shade600,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -1538,21 +1479,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Colors.green;
   }
 
-  String _getProgressText(Medication medication) {
-    if (medication.isCompletedToday == true) {
-      return 'Tamamlandı';
-    }
-
-    final percentage = medication.todayCompletionPercentage ?? 0;
-    if (percentage == 0) {
-      return 'Başlanmadı';
-    } else if (percentage < 100) {
-      return '${percentage.toInt()}% tamamlandı';
-    } else {
-      return 'Tamamlandı';
-    }
-  }
-
   // Greeting emoji metodu kaldırıldı - artık ikon kullanılıyor
 
   String _getGreetingMessage() {
@@ -1906,55 +1832,5 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
       ),
     );
-  }
-
-  Future<void> _testOneSignalNotification() async {
-    try {
-      final oneSignalService = OneSignalService();
-
-      // OneSignal durumunu kontrol et
-      final userId = await oneSignalService.getUserId();
-      final hasPermission = await oneSignalService.hasNotificationPermission();
-
-      print('🔔 OneSignal Test - User ID: $userId');
-      print('🔔 OneSignal Test - Has Permission: $hasPermission');
-
-      if (!hasPermission) {
-        await oneSignalService.requestNotificationPermission();
-        await Future.delayed(const Duration(milliseconds: 1000));
-      }
-
-      // Test tag gönder
-      await oneSignalService.sendTags({
-        'test_notification': DateTime.now().toIso8601String(),
-        'app_version': '1.0.0',
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('OneSignal Test Bilgileri:'),
-              Text('User ID: ${userId ?? "null"}'),
-              Text('Permission: $hasPermission'),
-              Text('Test tag gönderildi'),
-            ],
-          ),
-          backgroundColor: const Color(0xFF667EEA),
-          behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 5),
-        ),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('OneSignal Test Hatası: $e'),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
   }
 }
