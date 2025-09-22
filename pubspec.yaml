@@ -32,6 +32,9 @@ dependencies:
   # Icons
   font_awesome_flutter: ^10.6.0
   
+  # Fonts
+  google_fonts: ^6.1.0
+  
   # Notifications
   onesignal_flutter: ^5.3.4
 

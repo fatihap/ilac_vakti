@@ -59,9 +59,9 @@ class _LoginScreenState extends State<LoginScreen>
       final authService = AuthService();
       final oneSignalService = OneSignalService();
 
-      // OneSignal ID'sini al
-      final oneSignalId = await oneSignalService.getUserId();
-      print('📱 OneSignal ID: ${oneSignalId ?? "null"}');
+      // OneSignal Subscription ID'sini al (bildirimler için)
+      final oneSignalId = await oneSignalService.getSubscriptionId();
+      print('📱 OneSignal Subscription ID: ${oneSignalId ?? "null"}');
 
       final loginRequest = LoginRequest(
         email: _emailController.text.trim(),
@@ -105,27 +105,28 @@ class _LoginScreenState extends State<LoginScreen>
       } else {
         if (mounted) {
           String errorMessage = result['message'] ?? 'Giriş işlemi başarısız';
-          
+
           // E-posta bulunamadı durumu için özel mesaj
-          if (errorMessage.toLowerCase().contains('email') && 
-              (errorMessage.toLowerCase().contains('not found') || 
-               errorMessage.toLowerCase().contains('bulunamadı') ||
-               errorMessage.toLowerCase().contains('does not exist'))) {
-            errorMessage = 'Bu e-posta adresi kayıtlı değil. Hesap oluşturmayı deneyin.';
+          if (errorMessage.toLowerCase().contains('email') &&
+              (errorMessage.toLowerCase().contains('not found') ||
+                  errorMessage.toLowerCase().contains('bulunamadı') ||
+                  errorMessage.toLowerCase().contains('does not exist'))) {
+            errorMessage =
+                'Bu e-posta adresi kayıtlı değil. Hesap oluşturmayı deneyin.';
           }
           // Şifre yanlış durumu için özel mesaj
-          else if (errorMessage.toLowerCase().contains('password') && 
-                   (errorMessage.toLowerCase().contains('incorrect') || 
-                    errorMessage.toLowerCase().contains('wrong') ||
-                    errorMessage.toLowerCase().contains('yanlış'))) {
+          else if (errorMessage.toLowerCase().contains('password') &&
+              (errorMessage.toLowerCase().contains('incorrect') ||
+                  errorMessage.toLowerCase().contains('wrong') ||
+                  errorMessage.toLowerCase().contains('yanlış'))) {
             errorMessage = 'Şifre yanlış. Lütfen tekrar deneyin.';
           }
           // Genel kimlik doğrulama hatası
-          else if (errorMessage.toLowerCase().contains('credentials') || 
-                   errorMessage.toLowerCase().contains('unauthorized')) {
+          else if (errorMessage.toLowerCase().contains('credentials') ||
+              errorMessage.toLowerCase().contains('unauthorized')) {
             errorMessage = 'E-posta veya şifre hatalı. Lütfen kontrol edin.';
           }
-          
+
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(errorMessage),

@@ -49,6 +49,9 @@ PODS:
     - OneSignalXCFramework/OneSignalNotifications
     - OneSignalXCFramework/OneSignalOSCore
     - OneSignalXCFramework/OneSignalOutcomes
+  - path_provider_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -56,6 +59,7 @@ PODS:
 DEPENDENCIES:
   - Flutter (from `Flutter`)
   - onesignal_flutter (from `.symlinks/plugins/onesignal_flutter/ios`)
+  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
 
 SPEC REPOS:
@@ -67,6 +71,8 @@ EXTERNAL SOURCES:
     :path: Flutter
   onesignal_flutter:
     :path: ".symlinks/plugins/onesignal_flutter/ios"
+  path_provider_foundation:
+    :path: ".symlinks/plugins/path_provider_foundation/darwin"
   shared_preferences_foundation:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
 
@@ -74,6 +80,7 @@ SPEC CHECKSUMS:
   Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
   onesignal_flutter: f69ff09eeaf41cea4b7a841de5a61e79e7fd9a5a
   OneSignalXCFramework: 7112f3e89563e41ebc23fe807788f11985ac541c
+  path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78
 
 PODFILE CHECKSUM: 251cb053df7158f337c0712f2ab29f4e0fa474ce

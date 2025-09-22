@@ -29,11 +29,10 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>
-	<array>
-		<string>remote-notification</string>
-		<string>background-fetch</string>
-		<string>background-processing</string>
-	</array>
+<array>
+    <string>remote-notification</string>
+</array>
+
 	<key>NSUserNotificationAlertStyle</key>
 	<string>alert</string>
 	<key>OSNotificationDisplayType</key>

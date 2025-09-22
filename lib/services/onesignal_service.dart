@@ -31,7 +31,7 @@ class OneSignalService {
     }
   }
 
-  /// Kullanıcı ID'sini al
+  /// Kullanıcı ID'sini al (External User ID için)
   Future<String?> getUserId() async {
     try {
       final deviceState = await OneSignal.User.getOnesignalId();
@@ -39,6 +39,18 @@ class OneSignalService {
       return deviceState;
     } catch (e) {
       print('❌ Error getting user ID: $e');
+      return null;
+    }
+  }
+
+  /// Subscription ID'yi al (Bildirimler için)
+  Future<String?> getSubscriptionId() async {
+    try {
+      final subscriptionId = OneSignal.User.pushSubscription.id;
+      print('🔔 OneSignal Subscription ID: $subscriptionId');
+      return subscriptionId;
+    } catch (e) {
+      print('❌ Error getting subscription ID: $e');
       return null;
     }
   }
@@ -148,7 +160,7 @@ class OneSignalService {
       await sendTags(tags);
 
       // Subscription durumunu logla
-      final subscriptionId = OneSignal.User.pushSubscription.id;
+      final subscriptionId = await getSubscriptionId();
       final isSubscribed = OneSignal.User.pushSubscription.optedIn;
       print('📱 OneSignal subscription ID: $subscriptionId');
       print('📱 OneSignal is subscribed: $isSubscribed');
