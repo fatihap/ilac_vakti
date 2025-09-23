@@ -12,10 +12,10 @@ import 'services/onesignal_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // OneSignal'i başlat
   await _initializeOneSignal();
-  
+
   runApp(const MyApp());
 }
 
@@ -24,28 +24,30 @@ Future<void> _initializeOneSignal() async {
     // OneSignal servisini başlat
     final oneSignalService = OneSignalService();
     await oneSignalService.initialize();
-    
+
     // Kullanıcı ID'sini al
     final deviceState = await OneSignal.User.getOnesignalId();
     print('📱 OneSignal Device ID: $deviceState');
-    
+
     // Bildirim tıklama olaylarını dinle
     OneSignal.Notifications.addClickListener((event) {
       print('🔔 Notification opened: ${event.notification}');
-      
+
       // Burada bildirime tıklandığında yapılacak işlemler
       // Örneğin: belirli bir sayfaya yönlendirme
     });
-    
+
     // Bildirim alındığında çalışır
     OneSignal.Notifications.addForegroundWillDisplayListener((event) {
-      print('🔔 Notification received in foreground: ${event.notification.body}');
-      
+      print(
+        '🔔 Notification received in foreground: ${event.notification.body}',
+      );
+
       // Bildirimi göster
       event.preventDefault();
       event.notification.display();
     });
-    
+
     print('✅ OneSignal initialized successfully');
   } catch (e) {
     print('❌ OneSignal initialization error: $e');
@@ -57,18 +59,16 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: MultiProvider(
-        providers: [ChangeNotifierProvider(create: (_) => AuthProvider())],
-        child: MaterialApp(
-          title: AppConstants.appName,
-          debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-            // Ubuntu font ailesini kullan
-            textTheme: GoogleFonts.ubuntuTextTheme(),
-            primarySwatch: MaterialColor(
-              AppConstants.primaryColorValue,
-              const <int, Color>{
+    return MultiProvider(
+      providers: [ChangeNotifierProvider(create: (_) => AuthProvider())],
+      child: MaterialApp(
+        title: AppConstants.appName,
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          // Ubuntu font ailesini kullan
+          textTheme: GoogleFonts.ubuntuTextTheme(),
+          primarySwatch:
+              MaterialColor(AppConstants.primaryColorValue, const <int, Color>{
                 50: Color(0xFFF0F4FF),
                 100: Color(0xFFE0E7FF),
                 200: Color(0xFFC7D2FE),
@@ -79,92 +79,84 @@ class MyApp extends StatelessWidget {
                 700: Color(0xFF4F46E5),
                 800: Color(0xFF4338CA),
                 900: Color(0xFF3730A3),
-              },
-            ),
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color(AppConstants.primaryColorValue),
-              brightness: Brightness.light,
-            ),
-            useMaterial3: true,
-            scaffoldBackgroundColor: const Color(
-              AppConstants.backgroundColorValue,
-            ),
-            appBarTheme: const AppBarTheme(
-              backgroundColor: Colors.transparent,
-              foregroundColor: Color(AppConstants.textPrimaryValue),
+              }),
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color(AppConstants.primaryColorValue),
+            brightness: Brightness.light,
+          ),
+          useMaterial3: true,
+          scaffoldBackgroundColor: const Color(
+            AppConstants.backgroundColorValue,
+          ),
+          appBarTheme: const AppBarTheme(
+            backgroundColor: Colors.transparent,
+            foregroundColor: Color(AppConstants.textPrimaryValue),
+            elevation: 0,
+            centerTitle: true,
+          ),
+          elevatedButtonTheme: ElevatedButtonThemeData(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(AppConstants.primaryColorValue),
+              foregroundColor: Colors.white,
               elevation: 0,
-              centerTitle: true,
-            ),
-            elevatedButtonTheme: ElevatedButtonThemeData(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(AppConstants.primaryColorValue),
-                foregroundColor: Colors.white,
-                elevation: 0,
-                shadowColor: const Color(
-                  AppConstants.primaryColorValue,
-                ).withOpacity(0.3),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
-                ),
-              ),
-            ),
-            outlinedButtonTheme: OutlinedButtonThemeData(
-              style: OutlinedButton.styleFrom(
-                side: const BorderSide(
-                  color: Color(AppConstants.primaryColorValue),
-                  width: 2,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
-                ),
-              ),
-            ),
-            inputDecorationTheme: InputDecorationTheme(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(color: Colors.grey.shade300),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(color: Colors.grey.shade300),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(
-                  color: Color(AppConstants.primaryColorValue),
-                  width: 2,
-                ),
-              ),
-              filled: true,
-              fillColor: Colors.grey.shade50,
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 16,
-              ),
-            ),
-            cardTheme: CardThemeData(
-              elevation: 0,
+              shadowColor: const Color(
+                AppConstants.primaryColorValue,
+              ).withOpacity(0.3),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(16),
               ),
-              color: Colors.white,
-              shadowColor: Colors.grey.withOpacity(0.1),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             ),
           ),
-          home: const AuthWrapper(),
-          routes: {
-            '/login': (context) => const LoginScreen(),
-            '/home': (context) => const HomeScreen(),
-          },
+          outlinedButtonTheme: OutlinedButtonThemeData(
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(
+                color: Color(AppConstants.primaryColorValue),
+                width: 2,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            ),
+          ),
+          inputDecorationTheme: InputDecorationTheme(
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: Colors.grey.shade300),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: Colors.grey.shade300),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(
+                color: Color(AppConstants.primaryColorValue),
+                width: 2,
+              ),
+            ),
+            filled: true,
+            fillColor: Colors.grey.shade50,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 16,
+            ),
+          ),
+          cardTheme: CardThemeData(
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            color: Colors.white,
+            shadowColor: Colors.grey.withOpacity(0.1),
+          ),
         ),
+        home: const AuthWrapper(),
+        routes: {
+          '/login': (context) => const LoginScreen(),
+          '/home': (context) => const HomeScreen(),
+        },
       ),
     );
   }
@@ -189,7 +181,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
   Future<void> _checkFirstLaunch() async {
     final prefs = await SharedPreferences.getInstance();
     final onboardingCompleted = prefs.getBool('onboarding_completed') ?? false;
-    
+
     setState(() {
       _isFirstLaunch = !onboardingCompleted;
     });

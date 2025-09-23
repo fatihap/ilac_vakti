@@ -125,7 +125,7 @@ class _MedicationTrackingScreenState extends State<MedicationTrackingScreen> {
     final currentStatus = _medicationTracking[medicationId]![time] ?? false;
     final newStatus = !currentStatus;
     final savingKey = '${medicationId}_$time';
-    
+
     // Loading state'i başlat
     setState(() {
       _medicationTracking[medicationId]![time] = newStatus;
@@ -140,19 +140,21 @@ class _MedicationTrackingScreenState extends State<MedicationTrackingScreen> {
         final medicationService = MedicationService();
         final result = await medicationService.markMedicationTaken(
           medicationId,
-          _selectedDate.toIso8601String().split('T')[0], // YYYY-MM-DD formatında tarih
+          _selectedDate.toIso8601String().split(
+            'T',
+          )[0], // YYYY-MM-DD formatında tarih
           time,
         );
 
         if (result['success']) {
           // Başarılı kayıt - motivasyonel feedback göster
           _showMotivationalFeedback(true);
-          
+
           // Verileri yeniden yükle ve tracking'i güncelle
           await _loadMedications();
-          
+
           print('✅ Medication marked as taken: $medicationId at $time');
-          
+
           // Başarı mesajı göster
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -185,7 +187,7 @@ class _MedicationTrackingScreenState extends State<MedicationTrackingScreen> {
           setState(() {
             _medicationTracking[medicationId]![time] = currentStatus;
           });
-          
+
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Row(
@@ -218,7 +220,7 @@ class _MedicationTrackingScreenState extends State<MedicationTrackingScreen> {
         setState(() {
           _medicationTracking[medicationId]![time] = currentStatus;
         });
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Row(
@@ -306,12 +308,10 @@ class _MedicationTrackingScreenState extends State<MedicationTrackingScreen> {
   Future<void> _editMedication(Medication medication) async {
     await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => AddMedicationScreen(
-          medication: medication,
-        ),
+        builder: (context) => AddMedicationScreen(medication: medication),
       ),
     );
-    
+
     // İlaç düzenlendikten sonra listeyi yenile
     _loadMedications();
   }
@@ -320,9 +320,7 @@ class _MedicationTrackingScreenState extends State<MedicationTrackingScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Row(
           children: [
             Container(
@@ -340,10 +338,7 @@ class _MedicationTrackingScreenState extends State<MedicationTrackingScreen> {
             const SizedBox(width: 12),
             const Text(
               'İlaç Sil',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -353,10 +348,7 @@ class _MedicationTrackingScreenState extends State<MedicationTrackingScreen> {
           children: [
             Text(
               '${medication.name} ilacını silmek istediğinizden emin misiniz?',
-              style: const TextStyle(
-                fontSize: 16,
-                color: Color(0xFF64748B),
-              ),
+              style: const TextStyle(fontSize: 16, color: Color(0xFF64748B)),
             ),
             const SizedBox(height: 16),
             Container(
@@ -1056,7 +1048,8 @@ class _MedicationTrackingScreenState extends State<MedicationTrackingScreen> {
                     const SizedBox(width: 8),
                     // İlaç yönetim menüsü
                     PopupMenuButton<String>(
-                      onSelected: (value) => _handleMedicationAction(value, medication),
+                      onSelected: (value) =>
+                          _handleMedicationAction(value, medication),
                       itemBuilder: (context) => [
                         PopupMenuItem(
                           value: 'edit',
@@ -1065,7 +1058,9 @@ class _MedicationTrackingScreenState extends State<MedicationTrackingScreen> {
                               Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF3B82F6).withOpacity(0.1),
+                                  color: const Color(
+                                    0xFF3B82F6,
+                                  ).withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: const Icon(
@@ -1089,7 +1084,9 @@ class _MedicationTrackingScreenState extends State<MedicationTrackingScreen> {
                               Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFEF4444).withOpacity(0.1),
+                                  color: const Color(
+                                    0xFFEF4444,
+                                  ).withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: const Icon(
@@ -1162,9 +1159,14 @@ class _MedicationTrackingScreenState extends State<MedicationTrackingScreen> {
                       _medicationTracking[medication.id!]?[time] ?? false;
                   final savingKey = '${medication.id!}_$time';
                   final isSaving = _savingMedications.contains(savingKey);
-                  
+
                   return GestureDetector(
-                    onTap: isSaving ? null : () async => await _toggleMedicationTaken(medication.id!, time),
+                    onTap: isSaving
+                        ? null
+                        : () async => await _toggleMedicationTaken(
+                            medication.id!,
+                            time,
+                          ),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16,
@@ -1187,7 +1189,9 @@ class _MedicationTrackingScreenState extends State<MedicationTrackingScreen> {
                               height: 16,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: isTaken ? Colors.white : const Color(0xFF667EEA),
+                                color: isTaken
+                                    ? Colors.white
+                                    : const Color(0xFF667EEA),
                               ),
                             )
                           else
