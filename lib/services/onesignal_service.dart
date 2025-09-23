@@ -18,17 +18,12 @@ class OneSignalService {
 
       // iOS için özel ayarlar
       OneSignal.Notifications.requestPermission(true);
-      
+
       // Subscription durumunu dinle
-      OneSignal.User.pushSubscription.addObserver((state) {
-        print('🔔 OneSignal subscription changed: $state');
-      });
+      OneSignal.User.pushSubscription.addObserver((state) {});
 
       _initialized = true;
-      print('✅ OneSignal Service initialized');
-    } catch (e) {
-      print('❌ OneSignal Service initialization error: $e');
-    }
+    } catch (e) {}
   }
 
   /// Kullanıcı ID'sini al (External User ID için)
@@ -158,17 +153,7 @@ class OneSignalService {
       }
 
       await sendTags(tags);
-
-      // Subscription durumunu logla
-      final subscriptionId = await getSubscriptionId();
-      final isSubscribed = OneSignal.User.pushSubscription.optedIn;
-      print('📱 OneSignal subscription ID: $subscriptionId');
-      print('📱 OneSignal is subscribed: $isSubscribed');
-
-      print('✅ User login processed for OneSignal: $userId');
-    } catch (e) {
-      print('❌ Error processing user login: $e');
-    }
+    } catch (e) {}
   }
 
   /// Kullanıcı çıkış yaptığında çağrılacak
@@ -199,11 +184,7 @@ class OneSignalService {
         'last_medication_type': medicationType,
         'medication_count': DateTime.now().millisecondsSinceEpoch.toString(),
       });
-
-      print('✅ Medication added event recorded: $medicationName');
-    } catch (e) {
-      print('❌ Error recording medication added: $e');
-    }
+    } catch (e) {}
   }
 
   /// İlaç alma olayını kaydet
@@ -217,20 +198,6 @@ class OneSignalService {
       print('✅ Medication taken event recorded: $medicationName');
     } catch (e) {
       print('❌ Error recording medication taken: $e');
-    }
-  }
-
-  /// Test bildirimi gönder (sadece kendi cihazınıza)
-  Future<void> sendTestNotification() async {
-    try {
-      final userId = await getUserId();
-      if (userId != null) {
-        // Bu işlem backend'den yapılmalı, burada sadece log yazıyoruz
-        print('📱 Test notification would be sent to: $userId');
-        print('💡 Use OneSignal dashboard or API to send actual notifications');
-      }
-    } catch (e) {
-      print('❌ Error sending test notification: $e');
     }
   }
 }

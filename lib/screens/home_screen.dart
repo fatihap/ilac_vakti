@@ -57,7 +57,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     try {
       print('📊 Fetching today\'s medications...');
       final today = DateTime.now().toIso8601String().split('T')[0];
-      
+
       // Önce bugünkü ilaç durumlarını getir
       final todayResult = await _medicationService.getMedicationsForDate(today);
       print('📋 Today result success: ${todayResult['success']}');
@@ -69,7 +69,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
           setState(() {
             _todaysMedications = todayMeds;
-            _allMedications = todayMeds; // Ana sayfa için bugünkü ilaçları göster
+            _allMedications =
+                todayMeds; // Ana sayfa için bugünkü ilaçları göster
             _isLoading = false;
           });
 
@@ -499,7 +500,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                       ),
                                       onSelected: (value) async {
                                         if (value == 'logout') {
-                                          await _showLogoutConfirmationDialog(authProvider);
+                                          await _showLogoutConfirmationDialog(
+                                            authProvider,
+                                          );
                                         } else if (value == 'onboarding') {
                                           final prefs =
                                               await SharedPreferences.getInstance();
@@ -1893,10 +1896,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     ),
                     Text(
                       'Hesabınızdan çıkmak istediğinizden emin misiniz?',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Color(0xFF64748B),
-                      ),
+                      style: TextStyle(fontSize: 14, color: Color(0xFF64748B)),
                     ),
                   ],
                 ),
@@ -2042,10 +2042,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         ),
                         Text(
                           'Tekrar görüşmek üzere! 👋',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.white70,
-                          ),
+                          style: TextStyle(fontSize: 12, color: Colors.white70),
                         ),
                       ],
                     ),
@@ -2064,9 +2061,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         );
 
         Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(
-            builder: (context) => const LoginScreen(),
-          ),
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
           (route) => false,
         );
       }
