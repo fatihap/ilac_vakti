@@ -341,6 +341,106 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
     );
   }
 
+  Widget _buildCupertinoDatePicker({
+    required DateTime initialDate,
+    required DateTime firstDate,
+    required DateTime lastDate,
+    required Function(DateTime) onDateSelected,
+    required String title,
+  }) {
+    DateTime selectedDate = initialDate;
+    
+    return Container(
+      height: 350,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+      ),
+      child: Column(
+        children: [
+          // Header
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [const Color(0xFF667EEA), const Color(0xFF764BA2)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Flexible(
+                  child: CupertinoButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text(
+                      'İptal',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+                Flexible(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.visible,
+                  ),
+                ),
+                Flexible(
+                  child: CupertinoButton(
+                    onPressed: () {
+                      onDateSelected(selectedDate);
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text(
+                      'Tamam',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          // Date Picker
+          Expanded(
+            child: CupertinoDatePicker(
+              mode: CupertinoDatePickerMode.date,
+              initialDateTime: initialDate,
+              minimumDate: firstDate,
+              maximumDate: lastDate,
+              onDateTimeChanged: (DateTime newDate) {
+                selectedDate = newDate;
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _removeReminderTime(int index) {
     setState(() {
       _reminderTimes.removeAt(index);
@@ -355,31 +455,50 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
           ) // Düzenleme modunda 1 yıl öncesine kadar
         : DateTime.now(); // Yeni ilaç eklerken sadece bugün ve sonrası
 
-    final DateTime? picked = await showDatePicker(
+    // initialDate'in firstDate'den küçük olmamasını sağla
+    final initialDate = _startDate.isBefore(firstDate) ? firstDate : _startDate;
+
+    await showCupertinoModalPopup<DateTime>(
       context: context,
-      initialDate: _startDate,
-      firstDate: firstDate,
-      lastDate: DateTime.now().add(const Duration(days: 365)),
+      builder: (BuildContext context) {
+        return _buildCupertinoDatePicker(
+          initialDate: initialDate,
+          firstDate: firstDate,
+          lastDate: DateTime.now().add(const Duration(days: 365)),
+          onDateSelected: (DateTime date) {
+            setState(() {
+              _startDate = date;
+            });
+          },
+          title: 'Başlangıç Tarihi Seç',
+        );
+      },
     );
-    if (picked != null) {
-      setState(() {
-        _startDate = picked;
-      });
-    }
   }
 
   Future<void> _selectEndDate() async {
-    final DateTime? picked = await showDatePicker(
+    final firstDate = _startDate;
+    final initialEndDate = _endDate ?? _startDate.add(const Duration(days: 30));
+    
+    // initialDate'in firstDate'den küçük olmamasını sağla
+    final initialDate = initialEndDate.isBefore(firstDate) ? firstDate : initialEndDate;
+
+    await showCupertinoModalPopup<DateTime>(
       context: context,
-      initialDate: _endDate ?? _startDate.add(const Duration(days: 30)),
-      firstDate: _startDate,
-      lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
+      builder: (BuildContext context) {
+        return _buildCupertinoDatePicker(
+          initialDate: initialDate,
+          firstDate: firstDate,
+          lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
+          onDateSelected: (DateTime date) {
+            setState(() {
+              _endDate = date;
+            });
+          },
+          title: 'Bitiş Tarihi Seç',
+        );
+      },
     );
-    if (picked != null) {
-      setState(() {
-        _endDate = picked;
-      });
-    }
   }
 
   void _toggleDay(int dayIndex) {
@@ -1813,59 +1932,171 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
     VoidCallback onTap,
     IconData icon,
   ) {
+    final isStartDate = label.contains('Başlangıç');
+    final isEndDate = label.contains('Bitiş');
+    
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(20),
+        margin: const EdgeInsets.only(bottom: 4),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          gradient: LinearGradient(
+            colors: isStartDate
+                ? [const Color(0xFF667EEA), const Color(0xFF764BA2)]
+                : isEndDate
+                    ? [const Color(0xFF10B981), const Color(0xFF059669)]
+                    : [const Color(0xFF667EEA), const Color(0xFF764BA2)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              color: (isStartDate
+                      ? const Color(0xFF667EEA)
+                      : isEndDate
+                          ? const Color(0xFF10B981)
+                          : const Color(0xFF667EEA))
+                  .withOpacity(0.3),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
             ),
           ],
         ),
-        child: Row(
-          children: [
-            Icon(icon, color: const Color(0xFF667EEA), size: 20),
-            const SizedBox(width: 12),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF64748B),
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  date != null
-                      ? '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}'
-                      : 'Tarih seçin',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: date != null
-                        ? const Color(0xFF1E293B)
-                        : const Color(0xFF64748B),
-                  ),
-                ),
-              ],
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.95),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.2),
+              width: 1,
             ),
-            const Spacer(),
-            Icon(
-              FontAwesomeIcons.chevronRight,
-              color: const Color(0xFF64748B),
-              size: 16,
-            ),
-          ],
+          ),
+          child: Row(
+            children: [
+              // İkon container
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: isStartDate
+                        ? [const Color(0xFF667EEA), const Color(0xFF764BA2)]
+                        : isEndDate
+                            ? [const Color(0xFF10B981), const Color(0xFF059669)]
+                            : [const Color(0xFF667EEA), const Color(0xFF764BA2)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: (isStartDate
+                              ? const Color(0xFF667EEA)
+                              : isEndDate
+                                  ? const Color(0xFF10B981)
+                                  : const Color(0xFF667EEA))
+                          .withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  icon,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 16),
+              
+              // Tarih bilgileri
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.visible,
+                    ),
+                    const SizedBox(height: 6),
+                    if (date != null) ...[
+                      // Tarih formatı
+                      Text(
+                        '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF1E293B),
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.visible,
+                      ),
+                      const SizedBox(height: 4),
+                      // Gün adı
+                      Text(
+                        _getDayName(date.weekday),
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey.shade600,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.visible,
+                      ),
+                    ] else ...[
+                      Text(
+                        'Tarih seçin',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey.shade500,
+                          fontStyle: FontStyle.italic,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.visible,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              
+              // Ok işareti
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  FontAwesomeIcons.chevronRight,
+                  color: Colors.grey.shade600,
+                  size: 14,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  String _getDayName(int weekday) {
+    const days = [
+      'Pazar',
+      'Pazartesi',
+      'Salı',
+      'Çarşamba',
+      'Perşembe',
+      'Cuma',
+      'Cumartesi',
+    ];
+    return days[weekday % 7];
   }
 }
