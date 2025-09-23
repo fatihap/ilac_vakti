@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import '../constants/app_constants.dart';
@@ -36,6 +37,10 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
   bool _snoozeEnabled = true;
   int _snoozeDurationMinutes = 15;
   int _maxSnoozes = 3;
+
+  // Cupertino time picker için state
+  int _selectedHour = 12;
+  int _selectedMinute = 0;
 
   final List<String> _weekDays = [
     'Pazartesi',
@@ -185,6 +190,155 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
         _reminderTimes.sort((a, b) => a.hour.compareTo(b.hour));
       });
     }
+  }
+
+  Future<void> _showCustomTimePicker() async {
+    // iPhone tarzı scroll wheel saat seçici
+    await showCupertinoModalPopup<TimeOfDay>(
+      context: context,
+      builder: (BuildContext context) {
+        return _buildCupertinoTimePicker();
+      },
+    );
+  }
+
+  Widget _buildCupertinoTimePicker() {
+    return Container(
+      height: 300,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+      ),
+      child: Column(
+        children: [
+          // Header
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade50,
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                CupertinoButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text(
+                    'İptal',
+                    style: TextStyle(
+                      color: Color(0xFF667EEA),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                const Text(
+                  'Saat Seç',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF1E293B),
+                  ),
+                ),
+                CupertinoButton(
+                  onPressed: () {
+                    // Seçilen saati ekle
+                    final selectedTime = TimeOfDay(
+                      hour: _selectedHour,
+                      minute: _selectedMinute,
+                    );
+                    setState(() {
+                      _reminderTimes.add(selectedTime);
+                      _reminderTimes.sort((a, b) => a.hour.compareTo(b.hour));
+                    });
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text(
+                    'Tamam',
+                    style: TextStyle(
+                      color: Color(0xFF667EEA),
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          // Time Picker
+          Expanded(
+            child: Row(
+              children: [
+                // Saat seçici
+                Expanded(
+                  child: CupertinoPicker(
+                    itemExtent: 50,
+                    onSelectedItemChanged: (int index) {
+                      _selectedHour = index;
+                    },
+                    children: List.generate(24, (index) {
+                      return Center(
+                        child: Text(
+                          index.toString().padLeft(2, '0'),
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xFF1E293B),
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                ),
+                
+                // İki nokta
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8),
+                  child: Text(
+                    ':',
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.w300,
+                      color: Color(0xFF1E293B),
+                    ),
+                  ),
+                ),
+                
+                // Dakika seçici
+                Expanded(
+                  child: CupertinoPicker(
+                    itemExtent: 50,
+                    onSelectedItemChanged: (int index) {
+                      _selectedMinute = index * 5; // 5'er dakika aralıklarla
+                    },
+                    children: List.generate(12, (index) {
+                      final minute = index * 5;
+                      return Center(
+                        child: Text(
+                          minute.toString().padLeft(2, '0'),
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xFF1E293B),
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   void _removeReminderTime(int index) {
@@ -1109,8 +1263,39 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
           ),
           const SizedBox(height: 12),
           Text(
-            'İlaç alım saatlerini seçin:',
+            'İlaç alım saatlerini seçin. Sabit saatlerden veya özel saat seçebilirsiniz:',
             style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+          ),
+          const SizedBox(height: 12),
+          
+          // Bilgi kutusu
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.blue.shade200),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  FontAwesomeIcons.lightbulb,
+                  color: Colors.blue.shade600,
+                  size: 16,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Örnek: 3 doz için 2 sabit saat + 1 özel saat seçebilirsiniz',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.blue.shade700,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 16),
 
@@ -1179,6 +1364,62 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
 
           const SizedBox(height: 16),
 
+          // Özel saat ekleme butonu
+          if (_reminderTimes.length < _dailyNotificationCount)
+            Container(
+              width: double.infinity,
+              margin: const EdgeInsets.only(bottom: 16),
+              child: ElevatedButton.icon(
+                onPressed: _showCustomTimePicker,
+                icon: const Icon(FontAwesomeIcons.plus, size: 16),
+                label: const Text('Özel Saat Ekle (Scroll Wheel)'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF10B981).withOpacity(0.1),
+                  foregroundColor: const Color(0xFF10B981),
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    side: BorderSide(
+                      color: const Color(0xFF10B981).withOpacity(0.3),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+          // Sabit saatler başlığı
+          Row(
+            children: [
+              Text(
+                'Hızlı Seçim - Sabit Saatler:',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade700,
+                ),
+              ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.blue.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.blue.shade200),
+                ),
+                child: Text(
+                  'Tek tıkla seç',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.blue.shade700,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
           // Time selection grid
           GridView.builder(
             shrinkWrap: true,
@@ -1236,57 +1477,80 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
           ),
 
           if (_reminderTimes.isNotEmpty) ...[
-            const SizedBox(height: 16),
-            Text(
-              'Seçilen saatler:',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey.shade700,
-              ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Text(
+                  'Seçilen saatler:',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade700,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  '${_reminderTimes.length}/${_dailyNotificationCount}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: _reminderTimes.asMap().entries.map((entry) {
                 final index = entry.key;
                 final time = entry.value;
+                final isCustomTime = !_predefinedTimes.any(
+                  (predefinedTime) =>
+                      predefinedTime.hour == time.hour &&
+                      predefinedTime.minute == time.minute,
+                );
+                
                 return Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF667EEA).withOpacity(0.1),
+                    color: isCustomTime
+                        ? const Color(0xFF10B981).withOpacity(0.1)
+                        : const Color(0xFF667EEA).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: const Color(0xFF667EEA).withOpacity(0.3),
+                      color: isCustomTime
+                          ? const Color(0xFF10B981).withOpacity(0.3)
+                          : const Color(0xFF667EEA).withOpacity(0.3),
                     ),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        FontAwesomeIcons.clock,
-                        color: const Color(0xFF667EEA),
+                        isCustomTime ? FontAwesomeIcons.userClock : FontAwesomeIcons.clock,
+                        color: isCustomTime ? const Color(0xFF10B981) : const Color(0xFF667EEA),
                         size: 12,
                       ),
                       const SizedBox(width: 3),
                       Text(
                         '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF667EEA),
+                          color: isCustomTime ? const Color(0xFF10B981) : const Color(0xFF667EEA),
                           fontSize: 11,
                         ),
                       ),
                       const SizedBox(width: 3),
                       GestureDetector(
                         onTap: () => _removeReminderTime(index),
-                        child: const Icon(
+                        child: Icon(
                           FontAwesomeIcons.xmark,
-                          color: Color(0xFFEF4444),
+                          color: isCustomTime ? const Color(0xFF10B981) : const Color(0xFFEF4444),
                           size: 10,
                         ),
                       ),

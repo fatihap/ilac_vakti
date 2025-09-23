@@ -145,9 +145,7 @@ class AuthService {
           'Accept': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: json.encode({
-          'password': password,
-        }),
+        body: json.encode({'password': password}),
       );
 
       final responseData = json.decode(response.body);
