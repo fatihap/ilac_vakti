@@ -36,14 +36,41 @@ class _MedicationTrackingScreenState extends State<MedicationTrackingScreen> {
 
     try {
       final medicationService = MedicationService();
-      final result = await medicationService.getMedications();
-
-      if (result['success']) {
-        final allMedications = result['medications'] ?? [];
+      final selectedDateStr = _selectedDate.toIso8601String().split('T')[0];
+      
+      // Önce belirli tarih için ilaç durumlarını getir
+      final dateResult = await medicationService.getMedicationsForDate(selectedDateStr);
+      
+      if (dateResult['success']) {
+        final dateMedications = dateResult['medications'] ?? [];
         setState(() {
-          _allMedications = allMedications;
+          _medications = dateMedications;
         });
-        _filterMedicationsForDate();
+        
+        // Eğer belirli tarih için veri yoksa, genel ilaç listesini getir
+        if (dateMedications.isEmpty) {
+          final generalResult = await medicationService.getMedications();
+          if (generalResult['success']) {
+            final allMedications = generalResult['medications'] ?? [];
+            setState(() {
+              _allMedications = allMedications;
+            });
+            _filterMedicationsForDate();
+          }
+        } else {
+          // Belirli tarih için veri varsa, tracking verilerini de getir
+          await _loadTrackingDataForDate(selectedDateStr);
+        }
+      } else {
+        // Belirli tarih için veri yoksa, genel ilaç listesini getir
+        final generalResult = await medicationService.getMedications();
+        if (generalResult['success']) {
+          final allMedications = generalResult['medications'] ?? [];
+          setState(() {
+            _allMedications = allMedications;
+          });
+          _filterMedicationsForDate();
+        }
       }
     } catch (e) {
       print('Error loading medications: $e');
@@ -51,6 +78,38 @@ class _MedicationTrackingScreenState extends State<MedicationTrackingScreen> {
       setState(() {
         _isLoading = false;
       });
+    }
+  }
+
+  Future<void> _loadTrackingDataForDate(String date) async {
+    try {
+      final medicationService = MedicationService();
+      final trackingResult = await medicationService.getMedicationTrackingForDate(date);
+      
+      if (trackingResult['success']) {
+        final trackingData = trackingResult['tracking'] ?? {};
+        _updateTrackingDataFromAPI(trackingData);
+      }
+    } catch (e) {
+      print('Error loading tracking data: $e');
+    }
+  }
+
+  void _updateTrackingDataFromAPI(Map<String, dynamic> trackingData) {
+    _medicationTracking = {};
+    
+    for (final medication in _medications) {
+      if (medication.id != null) {
+        _medicationTracking[medication.id!] = {};
+        
+        if (medication.allReminderTimes != null) {
+          for (final time in medication.allReminderTimes!) {
+            // API'den gelen tracking verilerine göre durumu ayarla
+            final key = '${medication.id}_$time';
+            _medicationTracking[medication.id!]![time] = trackingData[key] ?? false;
+          }
+        }
+      }
     }
   }
 
@@ -88,7 +147,7 @@ class _MedicationTrackingScreenState extends State<MedicationTrackingScreen> {
       setState(() {
         _selectedDate = picked;
       });
-      _filterMedicationsForDate();
+      _loadMedications(); // Tarih değiştiğinde yeni verileri yükle
     }
   }
 
@@ -96,7 +155,7 @@ class _MedicationTrackingScreenState extends State<MedicationTrackingScreen> {
     setState(() {
       _selectedDate = _selectedDate.add(Duration(days: days));
     });
-    _filterMedicationsForDate();
+    _loadMedications(); // Tarih değiştiğinde yeni verileri yükle
   }
 
   void _filterMedicationsForDate() {
@@ -150,8 +209,8 @@ class _MedicationTrackingScreenState extends State<MedicationTrackingScreen> {
           // Başarılı kayıt - motivasyonel feedback göster
           _showMotivationalFeedback(true);
 
-          // Verileri yeniden yükle ve tracking'i güncelle
-          await _loadMedications();
+          // Sadece tracking verilerini yeniden yükle (tüm ilaç listesini değil)
+          await _loadTrackingDataForDate(_selectedDate.toIso8601String().split('T')[0]);
 
           print('✅ Medication marked as taken: $medicationId at $time');
 

@@ -372,4 +372,109 @@ class MedicationService {
       };
     }
   }
+
+  // Belirli bir tarih için ilaç durumlarını getir
+  Future<Map<String, dynamic>> getMedicationsForDate(String date) async {
+    try {
+      final headers = await _getHeaders();
+      print('🔍 API Request: GET $_medicationsEndpoint/date/$date');
+      print('🔑 Headers: $headers');
+      
+      final response = await http.get(
+        Uri.parse('$_medicationsEndpoint/date/$date'),
+        headers: headers,
+      );
+
+      print('📡 Date Response Status: ${response.statusCode}');
+      print('📄 Date Response Body: ${response.body}');
+
+      final responseData = json.decode(response.body);
+
+      if (response.statusCode == 200) {
+        List<dynamic> medicationsJson = [];
+        
+        if (responseData['habits'] != null) {
+          medicationsJson = responseData['habits'] as List<dynamic>;
+          print('✅ Found date data in "habits" key: ${medicationsJson.length} items');
+        } else if (responseData['data'] != null) {
+          medicationsJson = responseData['data'] as List<dynamic>;
+          print('✅ Found date data in "data" key: ${medicationsJson.length} items');
+        } else if (responseData['medications'] != null) {
+          medicationsJson = responseData['medications'] as List<dynamic>;
+          print('✅ Found date data in "medications" key: ${medicationsJson.length} items');
+        } else if (responseData is List) {
+          medicationsJson = responseData as List<dynamic>;
+          print('✅ Date response is direct array: ${medicationsJson.length} items');
+        } else {
+          print('❌ No date medication data found');
+          print('📋 Available keys: ${responseData.keys.toList()}');
+        }
+        
+        final medications = medicationsJson
+            .map((json) => Medication.fromJson(json))
+            .toList();
+
+        return {
+          'success': true,
+          'medications': medications,
+          'message': '$date tarihi için ilaçlar başarıyla getirildi',
+        };
+      } else {
+        print('❌ Date API Error: ${response.statusCode} - ${responseData['message']}');
+        return {
+          'success': false,
+          'message': responseData['message'] ?? '$date tarihi için ilaçlar getirilemedi',
+          'medications': <Medication>[],
+        };
+      }
+    } catch (e) {
+      print('💥 Exception in getMedicationsForDate: $e');
+      return {
+        'success': false,
+        'message': 'Bağlantı hatası: $e',
+        'medications': <Medication>[],
+      };
+    }
+  }
+
+  // Belirli bir tarih için ilaç alım durumlarını getir
+  Future<Map<String, dynamic>> getMedicationTrackingForDate(String date) async {
+    try {
+      final headers = await _getHeaders();
+      print('🔍 API Request: GET $_medicationsEndpoint/tracking/$date');
+      print('🔑 Headers: $headers');
+      
+      final response = await http.get(
+        Uri.parse('$_medicationsEndpoint/tracking/$date'),
+        headers: headers,
+      );
+
+      print('📡 Tracking Response Status: ${response.statusCode}');
+      print('📄 Tracking Response Body: ${response.body}');
+
+      final responseData = json.decode(response.body);
+
+      if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'tracking': responseData['tracking'] ?? responseData['data'] ?? {},
+          'message': '$date tarihi için takip verileri başarıyla getirildi',
+        };
+      } else {
+        print('❌ Tracking API Error: ${response.statusCode} - ${responseData['message']}');
+        return {
+          'success': false,
+          'message': responseData['message'] ?? '$date tarihi için takip verileri getirilemedi',
+          'tracking': <String, dynamic>{},
+        };
+      }
+    } catch (e) {
+      print('💥 Exception in getMedicationTrackingForDate: $e');
+      return {
+        'success': false,
+        'message': 'Bağlantı hatası: $e',
+        'tracking': <String, dynamic>{},
+      };
+    }
+  }
 }

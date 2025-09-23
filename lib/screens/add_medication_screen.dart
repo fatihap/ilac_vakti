@@ -179,19 +179,6 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
     super.dispose();
   }
 
-  Future<void> _addReminderTime() async {
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    );
-    if (picked != null) {
-      setState(() {
-        _reminderTimes.add(picked);
-        _reminderTimes.sort((a, b) => a.hour.compareTo(b.hour));
-      });
-    }
-  }
-
   Future<void> _showCustomTimePicker() async {
     // iPhone tarzı scroll wheel saat seçici
     await showCupertinoModalPopup<TimeOfDay>(
@@ -271,7 +258,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
               ],
             ),
           ),
-          
+
           // Time Picker
           Expanded(
             child: Row(
@@ -297,7 +284,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                     }),
                   ),
                 ),
-                
+
                 // İki nokta
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 8),
@@ -310,7 +297,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                     ),
                   ),
                 ),
-                
+
                 // Dakika seçici
                 Expanded(
                   child: CupertinoPicker(
@@ -349,7 +336,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
     required String title,
   }) {
     DateTime selectedDate = initialDate;
-    
+
     return Container(
       height: 350,
       decoration: const BoxDecoration(
@@ -423,7 +410,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
               ],
             ),
           ),
-          
+
           // Date Picker
           Expanded(
             child: CupertinoDatePicker(
@@ -479,9 +466,11 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
   Future<void> _selectEndDate() async {
     final firstDate = _startDate;
     final initialEndDate = _endDate ?? _startDate.add(const Duration(days: 30));
-    
+
     // initialDate'in firstDate'den küçük olmamasını sağla
-    final initialDate = initialEndDate.isBefore(firstDate) ? firstDate : initialEndDate;
+    final initialDate = initialEndDate.isBefore(firstDate)
+        ? firstDate
+        : initialEndDate;
 
     await showCupertinoModalPopup<DateTime>(
       context: context,
@@ -1386,7 +1375,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
             style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
           ),
           const SizedBox(height: 12),
-          
+
           // Bilgi kutusu
           Container(
             padding: const EdgeInsets.all(12),
@@ -1630,7 +1619,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                       predefinedTime.hour == time.hour &&
                       predefinedTime.minute == time.minute,
                 );
-                
+
                 return Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
@@ -1651,8 +1640,12 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        isCustomTime ? FontAwesomeIcons.userClock : FontAwesomeIcons.clock,
-                        color: isCustomTime ? const Color(0xFF10B981) : const Color(0xFF667EEA),
+                        isCustomTime
+                            ? FontAwesomeIcons.userClock
+                            : FontAwesomeIcons.clock,
+                        color: isCustomTime
+                            ? const Color(0xFF10B981)
+                            : const Color(0xFF667EEA),
                         size: 12,
                       ),
                       const SizedBox(width: 3),
@@ -1660,7 +1653,9 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                         '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}',
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
-                          color: isCustomTime ? const Color(0xFF10B981) : const Color(0xFF667EEA),
+                          color: isCustomTime
+                              ? const Color(0xFF10B981)
+                              : const Color(0xFF667EEA),
                           fontSize: 11,
                         ),
                       ),
@@ -1669,7 +1664,9 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                         onTap: () => _removeReminderTime(index),
                         child: Icon(
                           FontAwesomeIcons.xmark,
-                          color: isCustomTime ? const Color(0xFF10B981) : const Color(0xFFEF4444),
+                          color: isCustomTime
+                              ? const Color(0xFF10B981)
+                              : const Color(0xFFEF4444),
                           size: 10,
                         ),
                       ),
@@ -1934,7 +1931,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
   ) {
     final isStartDate = label.contains('Başlangıç');
     final isEndDate = label.contains('Bitiş');
-    
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -1944,20 +1941,21 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
             colors: isStartDate
                 ? [const Color(0xFF667EEA), const Color(0xFF764BA2)]
                 : isEndDate
-                    ? [const Color(0xFF10B981), const Color(0xFF059669)]
-                    : [const Color(0xFF667EEA), const Color(0xFF764BA2)],
+                ? [const Color(0xFF10B981), const Color(0xFF059669)]
+                : [const Color(0xFF667EEA), const Color(0xFF764BA2)],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: (isStartDate
-                      ? const Color(0xFF667EEA)
-                      : isEndDate
+              color:
+                  (isStartDate
+                          ? const Color(0xFF667EEA)
+                          : isEndDate
                           ? const Color(0xFF10B981)
                           : const Color(0xFF667EEA))
-                  .withOpacity(0.3),
+                      .withOpacity(0.3),
               blurRadius: 15,
               offset: const Offset(0, 8),
             ),
@@ -1968,10 +1966,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
           decoration: BoxDecoration(
             color: Colors.white.withOpacity(0.95),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.2),
-              width: 1,
-            ),
+            border: Border.all(color: Colors.white.withOpacity(0.2), width: 1),
           ),
           child: Row(
             children: [
@@ -1983,33 +1978,30 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                     colors: isStartDate
                         ? [const Color(0xFF667EEA), const Color(0xFF764BA2)]
                         : isEndDate
-                            ? [const Color(0xFF10B981), const Color(0xFF059669)]
-                            : [const Color(0xFF667EEA), const Color(0xFF764BA2)],
+                        ? [const Color(0xFF10B981), const Color(0xFF059669)]
+                        : [const Color(0xFF667EEA), const Color(0xFF764BA2)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
-                      color: (isStartDate
-                              ? const Color(0xFF667EEA)
-                              : isEndDate
+                      color:
+                          (isStartDate
+                                  ? const Color(0xFF667EEA)
+                                  : isEndDate
                                   ? const Color(0xFF10B981)
                                   : const Color(0xFF667EEA))
-                          .withOpacity(0.3),
+                              .withOpacity(0.3),
                       blurRadius: 8,
                       offset: const Offset(0, 4),
                     ),
                   ],
                 ),
-                child: Icon(
-                  icon,
-                  color: Colors.white,
-                  size: 20,
-                ),
+                child: Icon(icon, color: Colors.white, size: 20),
               ),
               const SizedBox(width: 16),
-              
+
               // Tarih bilgileri
               Expanded(
                 child: Column(
@@ -2066,7 +2058,7 @@ class _AddMedicationScreenState extends State<AddMedicationScreen> {
                   ],
                 ),
               ),
-              
+
               // Ok işareti
               Container(
                 padding: const EdgeInsets.all(8),

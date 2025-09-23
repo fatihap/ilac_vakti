@@ -55,25 +55,49 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     });
 
     try {
-      print('📊 Fetching all medications...');
-      final allResult = await _medicationService.getMedications();
-      print('📋 All result success: ${allResult['success']}');
+      print('📊 Fetching today\'s medications...');
+      final today = DateTime.now().toIso8601String().split('T')[0];
+      
+      // Önce bugünkü ilaç durumlarını getir
+      final todayResult = await _medicationService.getMedicationsForDate(today);
+      print('📋 Today result success: ${todayResult['success']}');
 
       if (mounted) {
-        final allMeds = allResult['medications'] ?? [];
-        print('✅ All medications count: ${allMeds.length}');
+        if (todayResult['success']) {
+          final todayMeds = todayResult['medications'] ?? [];
+          print('✅ Today medications count: ${todayMeds.length}');
 
-        setState(() {
-          _allMedications = allMeds;
-          _todaysMedications =
-              allMeds; // Şimdilik tüm ilaçları bugünkü olarak göster
-          _isLoading = false;
-        });
+          setState(() {
+            _todaysMedications = todayMeds;
+            _allMedications = todayMeds; // Ana sayfa için bugünkü ilaçları göster
+            _isLoading = false;
+          });
 
-        if (allMeds.isNotEmpty) {
-          print(
-            '📝 Medication names: ${allMeds.map((m) => m.name).join(', ')}',
-          );
+          if (todayMeds.isNotEmpty) {
+            print(
+              '📝 Today medication names: ${todayMeds.map((m) => m.name).join(', ')}',
+            );
+          }
+        } else {
+          // Bugünkü veri yoksa genel ilaç listesini getir
+          print('📊 Fetching all medications as fallback...');
+          final allResult = await _medicationService.getMedications();
+          print('📋 All result success: ${allResult['success']}');
+
+          final allMeds = allResult['medications'] ?? [];
+          print('✅ All medications count: ${allMeds.length}');
+
+          setState(() {
+            _allMedications = allMeds;
+            _todaysMedications = allMeds;
+            _isLoading = false;
+          });
+
+          if (allMeds.isNotEmpty) {
+            print(
+              '📝 Medication names: ${allMeds.map((m) => m.name).join(', ')}',
+            );
+          }
         }
       }
     } catch (e) {
@@ -475,18 +499,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                       ),
                                       onSelected: (value) async {
                                         if (value == 'logout') {
-                                          await authProvider.logout();
-                                          if (context.mounted) {
-                                            Navigator.of(
-                                              context,
-                                            ).pushAndRemoveUntil(
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    const LoginScreen(),
-                                              ),
-                                              (route) => false,
-                                            );
-                                          }
+                                          await _showLogoutConfirmationDialog(authProvider);
                                         } else if (value == 'onboarding') {
                                           final prefs =
                                               await SharedPreferences.getInstance();
@@ -1832,5 +1845,231 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
       ),
     );
+  }
+
+  Future<void> _showLogoutConfirmationDialog(AuthProvider authProvider) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: Colors.white,
+        title: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                const Color(0xFFF59E0B).withOpacity(0.1),
+                const Color(0xFFEF4444).withOpacity(0.1),
+              ],
+            ),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF59E0B).withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  FontAwesomeIcons.signOutAlt,
+                  size: 24,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(width: 16),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Çıkış Yap',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1E293B),
+                      ),
+                    ),
+                    Text(
+                      'Hesabınızdan çıkmak istediğinizden emin misiniz?',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF64748B),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF59E0B).withOpacity(0.05),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: const Color(0xFFF59E0B).withOpacity(0.2),
+                ),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        FontAwesomeIcons.questionCircle,
+                        color: const Color(0xFFF59E0B),
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Text(
+                          'Çıkış yaptığınızda oturumunuz sona erecek ve tekrar giriş yapmanız gerekecek.',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF1E293B),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF59E0B).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          FontAwesomeIcons.infoCircle,
+                          size: 16,
+                          color: Color(0xFFF59E0B),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'İlaç hatırlatmalarınız ve verileriniz güvende kalacak.',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFFF59E0B),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.grey.shade600,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            ),
+            child: const Text('İptal'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFF59E0B),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              elevation: 2,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(FontAwesomeIcons.signOutAlt, size: 16),
+                const SizedBox(width: 8),
+                const Text('Çıkış Yap'),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true) {
+      // Kullanıcı onayladı, çıkış yap
+      await authProvider.logout();
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Container(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      FontAwesomeIcons.signOutAlt,
+                      color: Colors.white,
+                      size: 16,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'Başarıyla çıkış yaptınız',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Text(
+                          'Tekrar görüşmek üzere! 👋',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.white70,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            backgroundColor: const Color(0xFFF59E0B),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            margin: const EdgeInsets.all(16),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (context) => const LoginScreen(),
+          ),
+          (route) => false,
+        );
+      }
+    }
   }
 }
